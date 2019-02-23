@@ -101,4 +101,100 @@ defmodule LILD.Accounts do
   def change_user(%User{} = user) do
     User.changeset(user, %{})
   end
+
+  alias LILD.Accounts.FirebaseAccount
+
+  @doc """
+  Returns the list of firebase_accounts.
+
+  ## Examples
+
+      iex> list_firebase_accounts()
+      [%FirebaseAccount{}, ...]
+
+  """
+  def list_firebase_accounts do
+    Repo.all(FirebaseAccount)
+  end
+
+  @doc """
+  Gets a single firebase_account.
+
+  Raises `Ecto.NoResultsError` if the Firebase account does not exist.
+
+  ## Examples
+
+      iex> get_firebase_account!(123)
+      %FirebaseAccount{}
+
+      iex> get_firebase_account!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_firebase_account!(id), do: Repo.get!(FirebaseAccount, id)
+
+  @doc """
+  Creates a firebase_account.
+
+  ## Examples
+
+      iex> create_firebase_account(%{field: value})
+      {:ok, %FirebaseAccount{}}
+
+      iex> create_firebase_account(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_firebase_account(attrs \\ %{}) do
+    %FirebaseAccount{}
+    |> FirebaseAccount.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a firebase_account.
+
+  ## Examples
+
+      iex> update_firebase_account(firebase_account, %{field: new_value})
+      {:ok, %FirebaseAccount{}}
+
+      iex> update_firebase_account(firebase_account, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_firebase_account(%FirebaseAccount{} = firebase_account, attrs) do
+    firebase_account
+    |> FirebaseAccount.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a FirebaseAccount.
+
+  ## Examples
+
+      iex> delete_firebase_account(firebase_account)
+      {:ok, %FirebaseAccount{}}
+
+      iex> delete_firebase_account(firebase_account)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_firebase_account(%FirebaseAccount{} = firebase_account) do
+    Repo.delete(firebase_account)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking firebase_account changes.
+
+  ## Examples
+
+      iex> change_firebase_account(firebase_account)
+      %Ecto.Changeset{source: %FirebaseAccount{}}
+
+  """
+  def change_firebase_account(%FirebaseAccount{} = firebase_account) do
+    FirebaseAccount.changeset(firebase_account, %{})
+  end
 end
