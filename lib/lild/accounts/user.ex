@@ -2,12 +2,13 @@ defmodule LILD.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
-
-  @primary_key {:id, :binary_id, autogenerate: true}
-  @foreign_key_type :binary_id
+  @primary_key {:id, Ecto.ULID, autogenerate: true}
+  @foreign_key_type Ecto.ULID
   schema "users" do
     field :avatar_url, :string
     field :name, :string
+
+    has_one :firebase_account, LILD.Accounts.FirebaseAccount
 
     timestamps()
   end
