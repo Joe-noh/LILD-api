@@ -5,7 +5,9 @@ defmodule LILDWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/api", LILDWeb do
+  scope "/v1", LILDWeb do
     pipe_through :api
+
+    resources "/users", UserController, only: [:show, :create, :update, :delete]
   end
 end
