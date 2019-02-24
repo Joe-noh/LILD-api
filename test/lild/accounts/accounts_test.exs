@@ -41,6 +41,7 @@ defmodule LILD.AccountsTest do
 
     test "delete_user/1 deletes the user", %{user: user} do
       assert {:ok, %{user: _, firebase_account: _}} = Accounts.delete_user(user)
+
       assert_raise Ecto.NoResultsError, fn ->
         Accounts.get_user!(user.id)
       end
