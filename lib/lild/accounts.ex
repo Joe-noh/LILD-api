@@ -13,8 +13,12 @@ defmodule LILD.Accounts do
     Repo.get!(User, id)
   end
 
+  def get_user(id) do
+    Repo.get(User, id)
+  end
+
   def create_user(user_attrs, firebase_account_attrs) do
-    Multi.new
+    Multi.new()
     |> Multi.insert(:user, User.changeset(%User{}, user_attrs))
     |> Multi.run(:firebase_account, fn repo, %{user: user} ->
       user
@@ -22,7 +26,7 @@ defmodule LILD.Accounts do
       |> FirebaseAccount.changeset(firebase_account_attrs)
       |> repo.insert
     end)
-    |> Repo.transaction
+    |> Repo.transaction()
   end
 
   def update_user(%User{} = user, attrs) do
@@ -34,7 +38,7 @@ defmodule LILD.Accounts do
   def delete_user(%User{} = user) do
     user = Repo.preload(user, :firebase_account)
 
-    Multi.new
+    Multi.new()
     |> Multi.delete(:firebase_account, user.firebase_account)
     |> Multi.delete(:user, user)
     |> Repo.transaction()
