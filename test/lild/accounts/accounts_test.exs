@@ -27,11 +27,11 @@ defmodule LILD.AccountsTest do
       user
       |> Ecto.build_assoc(:firebase_account)
       |> FirebaseAccount.changeset(%{provider: "some provider", uid: "some uid"})
-      |> IO.inspect
-      |> Repo.insert!
+      |> IO.inspect()
+      |> Repo.insert!()
       |> Ecto.assoc(:user)
-      |> Repo.one
-      |> IO.inspect
+      |> Repo.one()
+      |> IO.inspect()
     end
 
     test "get_user!/1 returns the user with given id" do
