@@ -8,7 +8,7 @@ defmodule LILDWeb.AccessTokenTest do
     {:ok, ^payload} = AccessToken.decode(jwt)
 
     assert payload["sub"] == "12345"
-    assert payload["aud"] == "User"
+    assert payload["aud"] == "user"
     assert payload["iss"] == "LILD"
     assert payload["exp"] - payload["iat"] == 24 * 60 * 60
   end
