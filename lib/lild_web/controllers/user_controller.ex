@@ -6,11 +6,14 @@ defmodule LILDWeb.UserController do
 
   action_fallback LILDWeb.FallbackController
 
-  def create(conn, %{"user" => user_params}) do
-    with {:ok, %User{} = user} <- Accounts.create_user(user_params) do
+  def create(conn, %{"user" => user_params = %{"id_token" => id_token}}) do
+    with {:ok, payload} <- Accounts.verify_id_token(id_token),
+         %{"firebase" => %{"sign_in_provider" => provider}, "user_id" => uid} = payload,
+         firebase_account_params = %{provider: provider, uid: uid},
+         {:ok, %{user: %User{} = user}} <-
+           Accounts.create_user(user_params, firebase_account_params) do
       conn
       |> put_status(:created)
-      |> put_resp_header("location", Routes.user_path(conn, :show, user))
       |> render("show.json", user: user)
     end
   end

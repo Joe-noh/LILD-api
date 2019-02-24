@@ -43,7 +43,10 @@ defmodule LILD.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:cowboy, "~> 2.5", override: true},
       {:ecto_ulid, "~> 0.2.0"},
-      {:jwt, git: "https://github.com/amezcua/jwt-google-tokens.git", revision: "3d166ae67515ce376680e02f287e7fac7e45e2a4"}
+      {:jwt,
+       git: "https://github.com/amezcua/jwt-google-tokens.git",
+       revision: "3d166ae67515ce376680e02f287e7fac7e45e2a4"},
+      {:mock, "~> 0.3.0", only: :test}
     ]
   end
 

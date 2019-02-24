@@ -11,8 +11,6 @@ defmodule LILDWeb.FirebaseAccountView do
   end
 
   def render("firebase_account.json", %{firebase_account: firebase_account}) do
-    %{id: firebase_account.id,
-      uid: firebase_account.uid,
-      provider: firebase_account.provider}
+    %{id: firebase_account.id, uid: firebase_account.uid, provider: firebase_account.provider}
   end
 end

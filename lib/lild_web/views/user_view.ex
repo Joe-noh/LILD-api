@@ -11,8 +11,6 @@ defmodule LILDWeb.UserView do
   end
 
   def render("user.json", %{user: user}) do
-    %{id: user.id,
-      name: user.name,
-      avatar_url: user.avatar_url}
+    %{id: user.id, name: user.name, avatar_url: user.avatar_url}
   end
 end
