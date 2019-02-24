@@ -3,6 +3,7 @@ defmodule LILDWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug LILDWeb.CurrentUserPlug
   end
 
   scope "/v1", LILDWeb do
