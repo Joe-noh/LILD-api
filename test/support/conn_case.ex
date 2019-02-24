@@ -20,6 +20,7 @@ defmodule LILDWeb.ConnCase do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
       alias LILDWeb.Router.Helpers, as: Routes
+      alias LILD.Fixture
 
       # The default endpoint for testing
       @endpoint LILDWeb.Endpoint

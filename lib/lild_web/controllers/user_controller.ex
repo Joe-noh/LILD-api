@@ -14,6 +14,9 @@ defmodule LILDWeb.UserController do
       conn
       |> put_status(:created)
       |> render("show.json", user: user)
+    else
+      {:error, _, changeset, _} ->
+        {:error, changeset}
     end
   end
 
