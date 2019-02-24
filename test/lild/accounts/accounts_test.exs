@@ -17,7 +17,8 @@ defmodule LILD.AccountsTest do
 
       assert user.name == user_attrs.name
       assert user.avatar_url == user_attrs.avatar_url
-      assert firebase_account.uid == firebase_account_attrs.uid
+      assert firebase_account.firebase_uid == firebase_account_attrs.firebase_uid
+      assert firebase_account.provider_uid == firebase_account_attrs.provider_uid
       assert firebase_account.provider == firebase_account_attrs.provider
     end
 

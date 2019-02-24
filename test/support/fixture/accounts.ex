@@ -8,7 +8,8 @@ defmodule LILD.Fixture.Accounts do
 
   def firebase_account(attrs \\ %{}) do
     LILD.Fixture.merge(attrs, %{
-      uid: "tR7hx0eEqeZYYFM9mODVmM29TUP2",
+      firebase_uid: "tR7hx0eEqeZYYFM9mODVmM29TUP2",
+      provider_uid: "872977718727458816",
       provider: Enum.random(["twitter.com", "google.com"])
     })
   end

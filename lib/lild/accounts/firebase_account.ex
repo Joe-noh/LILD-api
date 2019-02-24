@@ -5,8 +5,9 @@ defmodule LILD.Accounts.FirebaseAccount do
   @primary_key {:id, Ecto.ULID, autogenerate: true}
   @foreign_key_type Ecto.ULID
   schema "firebase_accounts" do
+    field :firebase_uid, :string
+    field :provider_uid, :string
     field :provider, :string
-    field :uid, :string
 
     belongs_to :user, LILD.Accounts.User
 
@@ -16,7 +17,7 @@ defmodule LILD.Accounts.FirebaseAccount do
   @doc false
   def changeset(firebase_account, attrs) do
     firebase_account
-    |> cast(attrs, [:uid, :provider])
-    |> validate_required([:uid, :provider])
+    |> cast(attrs, [:firebase_uid, :provider_uid, :provider])
+    |> validate_required([:firebase_uid, :provider_uid, :provider])
   end
 end
