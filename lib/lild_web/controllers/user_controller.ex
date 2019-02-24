@@ -48,7 +48,8 @@ defmodule LILDWeb.UserController do
       },
       "user_id" => firebase_uid
     } = payload
-    provider_uid = Map.get(identities, provider) |> List.first
+
+    provider_uid = Map.get(identities, provider) |> List.first()
 
     %{firebase_uid: firebase_uid, provider_uid: provider_uid, provider: provider}
   end

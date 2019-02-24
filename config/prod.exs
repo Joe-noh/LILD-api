@@ -17,6 +17,9 @@ config :lild, LILDWeb.Endpoint,
 # Do not print debug messages in production
 config :logger, level: :info
 
+config :joken,
+  hs256: [signer_alg: "HS256", key_octet: "BoKd2m96u5zjniOAhxDATpCrImFFqDv1t3fvzeyC3RdQDNLtLxxUyCGO6FzW4fsw"]
+
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key
