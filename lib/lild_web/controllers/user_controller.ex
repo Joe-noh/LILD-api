@@ -8,8 +8,7 @@ defmodule LILDWeb.UserController do
 
   def create(conn, %{"user" => user_params}) do
     with {:ok, payload} <- Accounts.verify_id_token(Map.get(user_params, "id_token")),
-         %{"firebase" => %{"sign_in_provider" => provider}, "user_id" => uid} = payload,
-         firebase_account_params = %{provider: provider, uid: uid},
+         firebase_account_params = extract_firebase_account_params(payload),
          {:ok, %{user: %User{} = user}} <- Accounts.create_user(user_params, firebase_account_params) do
       conn
       |> put_status(:created)
@@ -39,5 +38,18 @@ defmodule LILDWeb.UserController do
     with {:ok, _} <- Accounts.delete_user(user) do
       send_resp(conn, :no_content, "")
     end
+  end
+
+  defp extract_firebase_account_params(payload) do
+    %{
+      "firebase" => %{
+        "sign_in_provider" => provider,
+        "identities" => identities
+      },
+      "user_id" => firebase_uid
+    } = payload
+    provider_uid = Map.get(identities, provider) |> List.first
+
+    %{firebase_uid: firebase_uid, provider_uid: provider_uid, provider: provider}
   end
 end
