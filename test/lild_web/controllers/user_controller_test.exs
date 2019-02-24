@@ -43,8 +43,7 @@ defmodule LILDWeb.UserControllerTest do
   end
 
   describe "create user" do
-    test_with_mock "renders user when data is valid", %{conn: conn}, Accounts, [:passthrough],
-      verify_id_token: fn _ -> {:ok, @firebase_response} end do
+    test_with_mock "renders user when data is valid", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
       conn = post(conn, Routes.user_path(conn, :create), user: @create_attrs)
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
@@ -57,8 +56,7 @@ defmodule LILDWeb.UserControllerTest do
              } = json_response(conn, 200)["data"]
     end
 
-    test_with_mock "renders errors when data is invalid", %{conn: conn}, Accounts, [:passthrough],
-      verify_id_token: fn _ -> {:ok, @firebase_response} end do
+    test_with_mock "renders errors when data is invalid", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
       conn = post(conn, Routes.user_path(conn, :create), user: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end

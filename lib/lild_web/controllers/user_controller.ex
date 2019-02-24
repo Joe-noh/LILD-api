@@ -10,8 +10,7 @@ defmodule LILDWeb.UserController do
     with {:ok, payload} <- Accounts.verify_id_token(id_token),
          %{"firebase" => %{"sign_in_provider" => provider}, "user_id" => uid} = payload,
          firebase_account_params = %{provider: provider, uid: uid},
-         {:ok, %{user: %User{} = user}} <-
-           Accounts.create_user(user_params, firebase_account_params) do
+         {:ok, %{user: %User{} = user}} <- Accounts.create_user(user_params, firebase_account_params) do
       conn
       |> put_status(:created)
       |> render("show.json", user: user)
