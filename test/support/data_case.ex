@@ -17,6 +17,7 @@ defmodule LILD.DataCase do
   using do
     quote do
       alias LILD.Repo
+      alias LILD.Fixture
 
       import Ecto
       import Ecto.Changeset

@@ -7,11 +7,16 @@ defmodule LILDWeb.UserController do
   action_fallback LILDWeb.FallbackController
 
   def create(conn, %{"user" => user_params}) do
-    with {:ok, %User{} = user} <- Accounts.create_user(user_params) do
+    with {:ok, payload} <- Accounts.verify_id_token(Map.get(user_params, "id_token")),
+         %{"firebase" => %{"sign_in_provider" => provider}, "user_id" => uid} = payload,
+         firebase_account_params = %{provider: provider, uid: uid},
+         {:ok, %{user: %User{} = user}} <- Accounts.create_user(user_params, firebase_account_params) do
       conn
       |> put_status(:created)
-      |> put_resp_header("location", Routes.user_path(conn, :show, user))
       |> render("show.json", user: user)
+    else
+      {:error, _, changeset, _} ->
+        {:error, changeset}
     end
   end
 
@@ -31,7 +36,7 @@ defmodule LILDWeb.UserController do
   def delete(conn, %{"id" => id}) do
     user = Accounts.get_user!(id)
 
-    with {:ok, %User{}} <- Accounts.delete_user(user) do
+    with {:ok, _} <- Accounts.delete_user(user) do
       send_resp(conn, :no_content, "")
     end
   end
