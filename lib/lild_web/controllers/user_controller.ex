@@ -4,6 +4,8 @@ defmodule LILDWeb.UserController do
   alias LILD.Accounts
   alias LILD.Accounts.User
 
+  plug LILDWeb.RequireLoginPlug when action in [:show, :update, :delete]
+
   action_fallback LILDWeb.FallbackController
 
   def create(conn, %{"user" => user_params}) do
