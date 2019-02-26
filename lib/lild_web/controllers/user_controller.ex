@@ -4,6 +4,9 @@ defmodule LILDWeb.UserController do
   alias LILD.Accounts
   alias LILD.Accounts.User
 
+  plug LILDWeb.RequireLoginPlug when action in [:show, :update, :delete]
+  plug :check_access_restrictions when action in [:update, :delete]
+
   action_fallback LILDWeb.FallbackController
 
   def create(conn, %{"user" => user_params}) do
@@ -52,5 +55,15 @@ defmodule LILDWeb.UserController do
     provider_uid = Map.get(identities, provider) |> List.first()
 
     %{firebase_uid: firebase_uid, provider_uid: provider_uid, provider: provider}
+  end
+
+  defp check_access_restrictions(conn, _) do
+    if conn.assigns.current_user.id == conn.params["id"] do
+      conn
+    else
+      conn
+      |> LILDWeb.FallbackController.call({:error, :unauthorized})
+      |> Plug.Conn.halt()
+    end
   end
 end
