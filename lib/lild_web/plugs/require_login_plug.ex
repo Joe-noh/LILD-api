@@ -6,9 +6,7 @@ defmodule LILDWeb.RequireLoginPlug do
       conn
     else
       conn
-      |> Plug.Conn.put_status(:unauthorized)
-      |> Phoenix.Controller.put_view(LILDWeb.ErrorView)
-      |> Phoenix.Controller.render("401.json")
+      |> LILDWeb.FallbackController.call({:error, :unauthorized})
       |> Plug.Conn.halt()
     end
   end
