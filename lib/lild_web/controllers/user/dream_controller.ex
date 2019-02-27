@@ -1,8 +1,11 @@
-defmodule LILDWeb.DreamController do
+defmodule LILDWeb.User.DreamController do
   use LILDWeb, :controller
 
   alias LILD.Dreams
   alias LILD.Dreams.Dream
+
+  plug LILDWeb.RequireLoginPlug
+  plug :check_access_restrictions when action in [:update, :delete]
 
   action_fallback LILDWeb.FallbackController
 
@@ -12,10 +15,10 @@ defmodule LILDWeb.DreamController do
   end
 
   def create(conn, %{"dream" => dream_params}) do
-    with {:ok, %Dream{} = dream} <- Dreams.create_dream(dream_params) do
+    with user = conn.assigns.current_user,
+         {:ok, %Dream{} = dream} <- Dreams.create_dream(user, dream_params) do
       conn
       |> put_status(:created)
-      |> put_resp_header("location", Routes.dream_path(conn, :show, dream))
       |> render("show.json", dream: dream)
     end
   end
@@ -38,6 +41,16 @@ defmodule LILDWeb.DreamController do
 
     with {:ok, %Dream{}} <- Dreams.delete_dream(dream) do
       send_resp(conn, :no_content, "")
+    end
+  end
+
+  defp check_access_restrictions(conn, _) do
+    if conn.assigns.current_user.id == conn.params["user_id"] do
+      conn
+    else
+      conn
+      |> LILDWeb.FallbackController.call({:error, :unauthorized})
+      |> Plug.Conn.halt()
     end
   end
 end

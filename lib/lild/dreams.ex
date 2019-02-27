@@ -4,101 +4,31 @@ defmodule LILD.Dreams do
   """
 
   import Ecto.Query, warn: false
+
   alias LILD.Repo
-
   alias LILD.Dreams.Dream
+  alias LILD.Accounts.User
 
-  @doc """
-  Returns the list of dreams.
-
-  ## Examples
-
-      iex> list_dreams()
-      [%Dream{}, ...]
-
-  """
   def list_dreams do
     Repo.all(Dream)
   end
 
-  @doc """
-  Gets a single dream.
-
-  Raises `Ecto.NoResultsError` if the Dream does not exist.
-
-  ## Examples
-
-      iex> get_dream!(123)
-      %Dream{}
-
-      iex> get_dream!(456)
-      ** (Ecto.NoResultsError)
-
-  """
   def get_dream!(id), do: Repo.get!(Dream, id)
 
-  @doc """
-  Creates a dream.
-
-  ## Examples
-
-      iex> create_dream(%{field: value})
-      {:ok, %Dream{}}
-
-      iex> create_dream(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_dream(attrs \\ %{}) do
-    %Dream{}
+  def create_dream(user = %User{}, attrs \\ %{}) do
+    user
+    |> Ecto.build_assoc(:dreams)
     |> Dream.changeset(attrs)
     |> Repo.insert()
   end
 
-  @doc """
-  Updates a dream.
-
-  ## Examples
-
-      iex> update_dream(dream, %{field: new_value})
-      {:ok, %Dream{}}
-
-      iex> update_dream(dream, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_dream(%Dream{} = dream, attrs) do
+  def update_dream(dream = %Dream{}, attrs) do
     dream
     |> Dream.changeset(attrs)
     |> Repo.update()
   end
 
-  @doc """
-  Deletes a Dream.
-
-  ## Examples
-
-      iex> delete_dream(dream)
-      {:ok, %Dream{}}
-
-      iex> delete_dream(dream)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_dream(%Dream{} = dream) do
+  def delete_dream(dream = %Dream{}) do
     Repo.delete(dream)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking dream changes.
-
-  ## Examples
-
-      iex> change_dream(dream)
-      %Ecto.Changeset{source: %Dream{}}
-
-  """
-  def change_dream(%Dream{} = dream) do
-    Dream.changeset(dream, %{})
   end
 end

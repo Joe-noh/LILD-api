@@ -1,6 +1,6 @@
-defmodule LILDWeb.DreamView do
+defmodule LILDWeb.User.DreamView do
   use LILDWeb, :view
-  alias LILDWeb.DreamView
+  alias LILDWeb.User.DreamView
 
   def render("index.json", %{dreams: dreams}) do
     %{data: render_many(dreams, DreamView, "dream.json")}
