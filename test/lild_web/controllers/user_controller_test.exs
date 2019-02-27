@@ -116,6 +116,10 @@ defmodule LILDWeb.UserControllerTest do
     {:ok, %{user: owner}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.firebase_account())
     {:ok, %{user: another}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.firebase_account())
 
+    owner |> Ecto.build_assoc(:dreams)
+    |> LILD.Dreams.Dream.changeset(%{body: "a", date: Date.utc_today()})
+    |> LILD.Repo.insert()
+
     %{owner: owner, another: another}
   end
 
