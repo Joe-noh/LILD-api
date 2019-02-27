@@ -10,10 +10,26 @@ defmodule LILD.Dreams do
   alias LILD.Accounts.User
 
   def list_dreams do
-    Repo.all(Dream)
+    Dream |> list_dreams()
   end
 
-  def get_dream!(id), do: Repo.get!(Dream, id)
+  def list_dreams(user = %User{}) do
+    user
+    |> Ecto.assoc(:dreams)
+    |> list_dreams()
+  end
+
+  def list_dreams(queryable) do
+    queryable
+    |> order_by([d], desc: [d.date, d.inserted_at])
+    |> Repo.all()
+  end
+
+  def get_dream!(user = %User{}, id) do
+    user
+    |> Ecto.assoc(:dreams)
+    |> Repo.get!(id)
+  end
 
   def create_dream(user = %User{}, attrs \\ %{}) do
     user
