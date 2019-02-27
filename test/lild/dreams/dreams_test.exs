@@ -11,8 +11,8 @@ defmodule LILD.DreamsTest do
       assert Dreams.list_dreams() == [dream]
     end
 
-    test "get_dream!/1 returns the dream with given id", %{dream: dream} do
-      assert Dreams.get_dream!(dream.id) == dream
+    test "get_dream!/1 returns the dream with given id", %{user: user, dream: dream} do
+      assert Dreams.get_dream!(user, dream.id) == dream
     end
 
     test "create_dream/1 with valid data creates a dream", %{user: user} do
@@ -39,16 +39,16 @@ defmodule LILD.DreamsTest do
       assert dream.secret == dream_attrs.secret
     end
 
-    test "update_dream/2 with invalid data returns error changeset", %{dream: dream} do
+    test "update_dream/2 with invalid data returns error changeset", %{user: user, dream: dream} do
       assert {:error, %Ecto.Changeset{}} = Dreams.update_dream(dream, %{body: ''})
-      assert dream == Dreams.get_dream!(dream.id)
+      assert dream == Dreams.get_dream!(user, dream.id)
     end
 
-    test "delete_dream/1 deletes the dream", %{dream: dream} do
+    test "delete_dream/1 deletes the dream", %{user: user, dream: dream} do
       assert {:ok, %Dream{}} = Dreams.delete_dream(dream)
 
       assert_raise Ecto.NoResultsError, fn ->
-        Dreams.get_dream!(dream.id)
+        Dreams.get_dream!(user, dream.id)
       end
     end
   end
