@@ -1,70 +1,65 @@
 defmodule LILD.DreamsTest do
   use LILD.DataCase
 
-  alias LILD.Dreams
+  alias LILD.{Dreams, Accounts}
+  alias LILD.Dreams.Dream
 
   describe "dreams" do
-    alias LILD.Dreams.Dream
+    setup [:create_user, :create_dream]
 
-    @valid_attrs %{body: "some body", date: ~D[2010-04-17], draft: true, secret: true}
-    @update_attrs %{body: "some updated body", date: ~D[2011-05-18], draft: false, secret: false}
-    @invalid_attrs %{body: nil, date: nil, draft: nil, secret: nil}
-
-    def dream_fixture(attrs \\ %{}) do
-      {:ok, dream} =
-        attrs
-        |> Enum.into(@valid_attrs)
-        |> Dreams.create_dream()
-
-      dream
-    end
-
-    test "list_dreams/0 returns all dreams" do
-      dream = dream_fixture()
+    test "list_dreams/0 returns all dreams", %{dream: dream} do
       assert Dreams.list_dreams() == [dream]
     end
 
-    test "get_dream!/1 returns the dream with given id" do
-      dream = dream_fixture()
+    test "get_dream!/1 returns the dream with given id", %{dream: dream} do
       assert Dreams.get_dream!(dream.id) == dream
     end
 
-    test "create_dream/1 with valid data creates a dream" do
-      assert {:ok, %Dream{} = dream} = Dreams.create_dream(@valid_attrs)
-      assert dream.body == "some body"
-      assert dream.date == ~D[2010-04-17]
-      assert dream.draft == true
-      assert dream.secret == true
+    test "create_dream/1 with valid data creates a dream", %{user: user} do
+      dream_attrs = Fixture.Dreams.dream()
+      {:ok, dream} = Dreams.create_dream(user, dream_attrs)
+
+      assert dream.body == dream_attrs.body
+      assert dream.date == dream_attrs.date
+      assert dream.draft == dream_attrs.draft
+      assert dream.secret == dream_attrs.secret
     end
 
-    test "create_dream/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Dreams.create_dream(@invalid_attrs)
+    test "create_dream/1 with invalid data returns error changeset", %{user: user} do
+      assert {:error, %Ecto.Changeset{}} = Dreams.create_dream(user, %{body: ''})
     end
 
-    test "update_dream/2 with valid data updates the dream" do
-      dream = dream_fixture()
-      assert {:ok, %Dream{} = dream} = Dreams.update_dream(dream, @update_attrs)
-      assert dream.body == "some updated body"
-      assert dream.date == ~D[2011-05-18]
-      assert dream.draft == false
-      assert dream.secret == false
+    test "update_dream/2 with valid data updates the dream", %{dream: dream} do
+      dream_attrs = Fixture.Dreams.dream()
+      {:ok, dream} = Dreams.update_dream(dream, dream_attrs)
+
+      assert dream.body == dream_attrs.body
+      assert dream.date == dream_attrs.date
+      assert dream.draft == dream_attrs.draft
+      assert dream.secret == dream_attrs.secret
     end
 
-    test "update_dream/2 with invalid data returns error changeset" do
-      dream = dream_fixture()
-      assert {:error, %Ecto.Changeset{}} = Dreams.update_dream(dream, @invalid_attrs)
+    test "update_dream/2 with invalid data returns error changeset", %{dream: dream} do
+      assert {:error, %Ecto.Changeset{}} = Dreams.update_dream(dream, %{body: ''})
       assert dream == Dreams.get_dream!(dream.id)
     end
 
-    test "delete_dream/1 deletes the dream" do
-      dream = dream_fixture()
+    test "delete_dream/1 deletes the dream", %{dream: dream} do
       assert {:ok, %Dream{}} = Dreams.delete_dream(dream)
-      assert_raise Ecto.NoResultsError, fn -> Dreams.get_dream!(dream.id) end
-    end
 
-    test "change_dream/1 returns a dream changeset" do
-      dream = dream_fixture()
-      assert %Ecto.Changeset{} = Dreams.change_dream(dream)
+      assert_raise Ecto.NoResultsError, fn ->
+        Dreams.get_dream!(dream.id)
+      end
     end
+  end
+
+  defp create_user(_) do
+    Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.firebase_account())
+  end
+
+  defp create_dream(%{user: user}) do
+    {:ok, dream} = Dreams.create_dream(user, Fixture.Dreams.dream())
+
+    %{dream: dream}
   end
 end
