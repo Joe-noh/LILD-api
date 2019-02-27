@@ -1,100 +1,104 @@
 defmodule LILDWeb.DreamControllerTest do
   use LILDWeb.ConnCase
 
-  alias LILD.Dreams
-  alias LILD.Dreams.Dream
-
-  @create_attrs %{
-    body: "some body",
-    date: ~D[2010-04-17],
-    draft: true,
-    secret: true
-  }
-  @update_attrs %{
-    body: "some updated body",
-    date: ~D[2011-05-18],
-    draft: false,
-    secret: false
-  }
-  @invalid_attrs %{body: nil, date: nil, draft: nil, secret: nil}
-
-  def fixture(:dream) do
-    {:ok, dream} = Dreams.create_dream(@create_attrs)
-    dream
-  end
+  alias LILD.{Dreams, Accounts}
 
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
 
+  setup [:create_users, :login_as_owner]
+
   describe "index" do
-    test "lists all dreams", %{conn: conn} do
-      conn = get(conn, Routes.dream_path(conn, :index))
-      assert json_response(conn, 200)["data"] == []
+    setup [:create_dream]
+
+    test "lists all dreams", %{conn: conn, owner: owner, dream: dream} do
+      [first | _] =
+        get(conn, Routes.user_dream_path(conn, :index, owner))
+        |> json_response(200)
+        |> Map.get("data")
+
+      assert first["id"] == dream.id
     end
   end
 
   describe "create dream" do
-    test "renders dream when data is valid", %{conn: conn} do
-      conn = post(conn, Routes.dream_path(conn, :create), dream: @create_attrs)
-      assert %{"id" => id} = json_response(conn, 201)["data"]
+    test "renders dream when data is valid", %{conn: conn, owner: owner} do
+      params = Fixture.Dreams.dream()
 
-      conn = get(conn, Routes.dream_path(conn, :show, id))
+      data =
+        post(conn, Routes.user_dream_path(conn, :create, owner), dream: params)
+        |> json_response(201)
+        |> Map.get("data")
 
-      assert %{
-               "id" => id,
-               "body" => "some body",
-               "date" => "2010-04-17",
-               "draft" => true,
-               "secret" => true
-             } = json_response(conn, 200)["data"]
+      assert data["id"] |> is_binary
+      assert data["body"] == params[:body]
+      assert data["date"] == params[:date] |> to_string()
+      assert data["secret"] == params[:secret]
+      assert data["draft"] == params[:draft]
     end
 
-    test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, Routes.dream_path(conn, :create), dream: @invalid_attrs)
-      assert json_response(conn, 422)["errors"] != %{}
+    test "renders errors when data is invalid", %{conn: conn, owner: owner} do
+      errors =
+        post(conn, Routes.user_dream_path(conn, :create, owner), dream: %{body: ''})
+        |> json_response(422)
+        |> Map.get("errors")
+
+      assert errors != %{}
     end
   end
 
   describe "update dream" do
     setup [:create_dream]
 
-    test "renders dream when data is valid", %{conn: conn, dream: %Dream{id: id} = dream} do
-      conn = put(conn, Routes.dream_path(conn, :update, dream), dream: @update_attrs)
-      assert %{"id" => ^id} = json_response(conn, 200)["data"]
+    test "renders dream when data is valid", %{conn: conn, owner: owner, dream: dream} do
+      params = Fixture.Dreams.dream()
 
-      conn = get(conn, Routes.dream_path(conn, :show, id))
+      data =
+        put(conn, Routes.user_dream_path(conn, :update, owner, dream), dream: params)
+        |> json_response(200)
+        |> Map.get("data")
 
-      assert %{
-               "id" => id,
-               "body" => "some updated body",
-               "date" => "2011-05-18",
-               "draft" => false,
-               "secret" => false
-             } = json_response(conn, 200)["data"]
+      assert data["id"] |> is_binary
+      assert data["body"] == params[:body]
+      assert data["date"] == params[:date] |> to_string()
+      assert data["secret"] == params[:secret]
+      assert data["draft"] == params[:draft]
     end
 
-    test "renders errors when data is invalid", %{conn: conn, dream: dream} do
-      conn = put(conn, Routes.dream_path(conn, :update, dream), dream: @invalid_attrs)
-      assert json_response(conn, 422)["errors"] != %{}
+    test "renders errors when data is invalid", %{conn: conn, owner: owner, dream: dream} do
+      errors =
+        put(conn, Routes.user_dream_path(conn, :update, owner, dream), dream: %{body: ''})
+        |> json_response(422)
+        |> Map.get("errors")
+
+      assert errors != %{}
     end
   end
 
   describe "delete dream" do
     setup [:create_dream]
 
-    test "deletes chosen dream", %{conn: conn, dream: dream} do
-      conn = delete(conn, Routes.dream_path(conn, :delete, dream))
+    test "deletes chosen dream", %{conn: conn, owner: owner, dream: dream} do
+      conn = delete(conn, Routes.user_dream_path(conn, :delete, owner, dream))
       assert response(conn, 204)
-
-      assert_error_sent 404, fn ->
-        get(conn, Routes.dream_path(conn, :show, dream))
-      end
     end
   end
 
-  defp create_dream(_) do
-    dream = fixture(:dream)
-    {:ok, dream: dream}
+  defp create_users(_) do
+    {:ok, %{user: owner}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.firebase_account())
+    {:ok, %{user: another}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.firebase_account())
+
+    %{owner: owner, another: another}
+  end
+
+  defp login_as_owner(%{conn: conn, owner: owner}) do
+    %{conn: Plug.Conn.assign(conn, :current_user, owner)}
+  end
+
+  defp create_dream(%{owner: owner}) do
+    {:ok, dream} = Dreams.create_dream(owner, Fixture.Dreams.dream())
+
+    %{dream: dream}
   end
 end
