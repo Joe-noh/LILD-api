@@ -3,10 +3,6 @@ defmodule LILDWeb.DreamControllerTest do
 
   alias LILD.{Dreams, Accounts}
 
-  setup %{conn: conn} do
-    {:ok, conn: put_req_header(conn, "accept", "application/json")}
-  end
-
   setup [:create_users, :login_as_owner]
 
   describe "index" do

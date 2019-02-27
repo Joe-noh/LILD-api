@@ -6,10 +6,6 @@ defmodule LILDWeb.UserControllerTest do
 
   @firebase_response Fixture.Accounts.firebase_id_token_payload()
 
-  setup %{conn: conn} do
-    %{conn: put_req_header(conn, "accept", "application/json")}
-  end
-
   describe "create user" do
     test_with_mock "renders user when data is valid", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
       params = Fixture.Accounts.user(%{id_token: "firebase.id_token"})
