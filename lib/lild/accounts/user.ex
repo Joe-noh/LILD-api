@@ -9,6 +9,7 @@ defmodule LILD.Accounts.User do
     field :name, :string
 
     has_one :firebase_account, LILD.Accounts.FirebaseAccount
+    has_many :dreams, LILD.Dreams.Dream
 
     timestamps()
   end
