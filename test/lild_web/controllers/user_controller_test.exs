@@ -2,7 +2,7 @@ defmodule LILDWeb.UserControllerTest do
   use LILDWeb.ConnCase
 
   import Mock
-  alias LILD.Accounts
+  alias LILD.{Accounts, Dreams}
 
   @firebase_response Fixture.Accounts.firebase_id_token_payload()
 
@@ -112,7 +112,7 @@ defmodule LILDWeb.UserControllerTest do
     {:ok, %{user: owner}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.firebase_account())
     {:ok, %{user: another}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.firebase_account())
 
-    {:ok, _} = Dreams.create_dream(owner, FIxture.Dreams.dream())
+    {:ok, _} = Dreams.create_dream(owner, Fixture.Dreams.dream())
 
     %{owner: owner, another: another}
   end
