@@ -1,5 +1,5 @@
 defmodule LILD.DreamsTest do
-  use LILD.DataCase
+  use LILD.DataCase, async: true
 
   alias LILD.{Dreams, Accounts}
   alias LILD.Dreams.Dream

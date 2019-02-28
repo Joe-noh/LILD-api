@@ -1,5 +1,5 @@
 defmodule LILDWeb.RequireLoginPlugTest do
-  use LILDWeb.ConnCase
+  use LILDWeb.ConnCase, async: true
 
   alias LILD.Accounts
   alias LILDWeb.RequireLoginPlug

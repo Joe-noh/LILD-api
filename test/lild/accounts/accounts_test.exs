@@ -1,5 +1,5 @@
 defmodule LILD.AccountsTest do
-  use LILD.DataCase
+  use LILD.DataCase, async: true
 
   alias LILD.Accounts
 
