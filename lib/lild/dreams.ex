@@ -6,7 +6,7 @@ defmodule LILD.Dreams do
   import Ecto.Query, warn: false
 
   alias LILD.Repo
-  alias LILD.Dreams.Dream
+  alias LILD.Dreams.{Dream, Tag}
   alias LILD.Accounts.User
 
   def list_dreams do
@@ -46,5 +46,9 @@ defmodule LILD.Dreams do
 
   def delete_dream(dream = %Dream{}) do
     Repo.delete(dream)
+  end
+
+  def list_tags do
+    Repo.all(Tag)
   end
 end
