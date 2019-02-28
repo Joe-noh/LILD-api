@@ -11,6 +11,7 @@ defmodule LILD.Dreams.Dream do
     field :secret, :boolean, default: false
 
     belongs_to :user, LILD.Accounts.User
+    many_to_many :tags, LILD.Dreams.Tag, join_through: "dreams_tags"
 
     timestamps()
   end
