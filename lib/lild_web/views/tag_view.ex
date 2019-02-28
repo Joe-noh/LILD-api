@@ -11,7 +11,6 @@ defmodule LILDWeb.TagView do
   end
 
   def render("tag.json", %{tag: tag}) do
-    %{id: tag.id,
-      name: tag.name}
+    %{id: tag.id, name: tag.name}
   end
 end
