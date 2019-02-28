@@ -53,6 +53,13 @@ defmodule LILD.DreamsTest do
     end
   end
 
+  describe "tags" do
+    test "create same tag multiple times" do
+      assert Dreams.create_tags!(~w[a a a]) |> length == 1
+      assert Dreams.create_tags!(~w[a a a]) |> length == 1
+    end
+  end
+
   defp create_user(_) do
     Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.firebase_account())
   end

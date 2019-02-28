@@ -14,6 +14,6 @@ defmodule LILD.Repo.Migrations.CreateTags do
       add :tag_id, references(:tags, on_delete: :nothing, type: :binary_id)
     end
 
-    create unique_index(:tags, [:name])
+    create unique_index(:tags, [:name], name: :tags_name_index)
   end
 end

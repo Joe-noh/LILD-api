@@ -51,4 +51,14 @@ defmodule LILD.Dreams do
   def list_tags do
     Repo.all(Tag)
   end
+
+  def create_tags!(names) do
+    names_in_db =
+      names
+      |> Enum.map(&Tag.changeset(%Tag{}, %{name: &1}))
+      |> Enum.map(&Repo.insert!(&1, on_conflict: :nothing))
+      |> Enum.map(& &1.name)
+
+    Tag |> where([t], t.name in ^names_in_db) |> Repo.all()
+  end
 end
