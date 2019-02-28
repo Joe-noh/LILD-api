@@ -17,6 +17,7 @@ defmodule LILD.Dreams.Tag do
     tag
     |> cast(attrs, [:name])
     |> validate_required([:name])
-    |> unique_constraint([:name])
+    |> validate_format(:name, ~r/\A[^\s]+\z/)
+    |> unique_constraint(:name, name: :tags_name_index)
   end
 end
