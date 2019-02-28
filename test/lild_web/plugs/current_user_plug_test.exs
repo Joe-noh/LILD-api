@@ -1,5 +1,5 @@
 defmodule LILDWeb.CurrentUserPlugTest do
-  use LILDWeb.ConnCase
+  use LILDWeb.ConnCase, async: true
 
   alias LILD.Accounts
   alias LILDWeb.{CurrentUserPlug, AccessToken}
