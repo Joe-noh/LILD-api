@@ -70,6 +70,18 @@ defmodule LILDWeb.DreamControllerTest do
 
       assert errors != %{}
     end
+
+    test "401 for another user", %{conn: conn, owner: owner, another: another, dream: dream} do
+      params = Fixture.Dreams.dream()
+
+      errors =
+        assign(conn, :current_user, another)
+        |> put(Routes.user_dream_path(conn, :update, owner, dream), dream: params)
+        |> json_response(401)
+        |> Map.get("errors")
+
+      assert errors != %{}
+    end
   end
 
   describe "delete dream" do
@@ -78,6 +90,16 @@ defmodule LILDWeb.DreamControllerTest do
     test "deletes chosen dream", %{conn: conn, owner: owner, dream: dream} do
       conn = delete(conn, Routes.user_dream_path(conn, :delete, owner, dream))
       assert response(conn, 204)
+    end
+
+    test "401 for another user", %{conn: conn, owner: owner, another: another, dream: dream} do
+      errors =
+        assign(conn, :current_user, another)
+        |> delete(Routes.user_dream_path(conn, :delete, owner, dream))
+        |> json_response(401)
+        |> Map.get("errors")
+
+      assert errors != %{}
     end
   end
 
