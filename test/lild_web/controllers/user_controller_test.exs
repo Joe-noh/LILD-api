@@ -1,14 +1,10 @@
 defmodule LILDWeb.UserControllerTest do
-  use LILDWeb.ConnCase
+  use LILDWeb.ConnCase, async: true
 
   import Mock
-  alias LILD.Accounts
+  alias LILD.{Accounts, Dreams}
 
   @firebase_response Fixture.Accounts.firebase_id_token_payload()
-
-  setup %{conn: conn} do
-    %{conn: put_req_header(conn, "accept", "application/json")}
-  end
 
   describe "create user" do
     test_with_mock "renders user when data is valid", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
@@ -115,6 +111,8 @@ defmodule LILDWeb.UserControllerTest do
   defp create_users(_) do
     {:ok, %{user: owner}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.firebase_account())
     {:ok, %{user: another}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.firebase_account())
+
+    {:ok, _} = Dreams.create_dream(owner, Fixture.Dreams.dream())
 
     %{owner: owner, another: another}
   end
