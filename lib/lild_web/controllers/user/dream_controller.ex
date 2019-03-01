@@ -34,8 +34,11 @@ defmodule LILDWeb.User.DreamController do
 
   def update(conn, %{"dream" => dream_params}) do
     with dream = conn.assigns.dream,
-         {:ok, %Dream{} = dream} <- Dreams.update_dream(dream, dream_params) do
+         {:ok, %{dream: %Dream{} = dream}} <- Dreams.update_dream(dream, dream_params) do
       render(conn, "show.json", dream: dream)
+    else
+      {:error, _, changeset, _} ->
+        {:error, changeset}
     end
   end
 
