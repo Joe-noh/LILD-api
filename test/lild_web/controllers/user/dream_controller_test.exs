@@ -115,8 +115,6 @@ defmodule LILDWeb.DreamControllerTest do
   end
 
   defp create_dream(%{owner: owner}) do
-    {:ok, dream} = Dreams.create_dream(owner, Fixture.Dreams.dream())
-
-    %{dream: dream}
+    Dreams.create_dream(owner, Fixture.Dreams.dream())
   end
 end

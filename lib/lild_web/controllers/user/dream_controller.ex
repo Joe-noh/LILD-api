@@ -18,10 +18,13 @@ defmodule LILDWeb.User.DreamController do
 
   def create(conn, %{"dream" => dream_params}) do
     with user = conn.assigns.current_user,
-         {:ok, %Dream{} = dream} <- Dreams.create_dream(user, dream_params) do
+         {:ok, %{dream: %Dream{} = dream}} <- Dreams.create_dream(user, dream_params) do
       conn
       |> put_status(:created)
       |> render("show.json", dream: dream)
+    else
+      {:error, _, changeset, _} ->
+        {:error, changeset}
     end
   end
 
