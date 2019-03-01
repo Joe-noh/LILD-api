@@ -55,9 +55,41 @@ defmodule LILD.Dreams do
   end
 
   def update_dream(dream = %Dream{}, attrs) do
-    dream
-    |> Dream.changeset(attrs)
-    |> Repo.update()
+    tag_names = Map.get(attrs, "tags") || Map.get(attrs, :tags)
+
+    if tag_names do
+      update_dream_with_tags(dream, attrs, tag_names)
+    else
+      do_update_dream(dream, attrs)
+    end
+  end
+
+  defp update_dream_with_tags(dream = %Dream{}, attrs, tag_names) do
+    Multi.new()
+    |> Multi.run(:tags, fn repo, _ ->
+      try do
+        {:ok, create_tags!(tag_names, repo)}
+      rescue
+        e in Ecto.InvalidChangesetError ->
+          {:error, e.changeset}
+      end
+    end)
+    |> Multi.run(:dream, fn repo, %{tags: tags} ->
+      dream
+      |> repo.preload(:tags)
+      |> Dream.changeset(attrs)
+      |> Ecto.Changeset.put_assoc(:tags, tags)
+      |> repo.update()
+    end)
+    |> Repo.transaction()
+  end
+
+  defp do_update_dream(dream = %Dream{}, attrs) do
+    changeset = Dream.changeset(dream, attrs)
+
+    Multi.new()
+    |> Multi.update(:dream, changeset)
+    |> Repo.transaction()
   end
 
   def delete_dream(dream = %Dream{}) do

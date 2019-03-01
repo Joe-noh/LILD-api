@@ -36,7 +36,7 @@ defmodule LILD.DreamsTest do
 
     test "update_dream/2 with valid data updates the dream", %{dream: dream} do
       dream_attrs = Fixture.Dreams.dream()
-      {:ok, dream} = Dreams.update_dream(dream, dream_attrs)
+      {:ok, %{dream: dream}} = Dreams.update_dream(dream, dream_attrs)
 
       assert dream.body == dream_attrs.body
       assert dream.date == dream_attrs.date
@@ -45,8 +45,27 @@ defmodule LILD.DreamsTest do
     end
 
     test "update_dream/2 with invalid data returns error changeset", %{user: user, dream: dream} do
-      assert {:error, %Ecto.Changeset{}} = Dreams.update_dream(dream, %{body: ''})
+      assert {:error, :dream, %Ecto.Changeset{}, _} = Dreams.update_dream(dream, %{body: ''})
       assert Dreams.get_dream!(user, dream.id) |> Map.get(:body) == dream.body
+    end
+
+    test "update dream tags", %{dream: dream} do
+      [name | _names] = dream.tags |> Enum.map(& &1.name)
+      {:ok, %{dream: %Dream{tags: [tag]}}} = Dreams.update_dream(dream, %{tags: [name]})
+
+      assert tag.name == name
+    end
+
+    test "updating with %{tag: []} removes all tags", %{dream: dream} do
+      {:ok, %{dream: dream}} = Dreams.update_dream(dream, %{tags: []})
+
+      assert dream.tags == []
+    end
+
+    test "updating without :tags remains current tags", %{dream: dream} do
+      {:ok, %{dream: dream}} = Dreams.update_dream(dream, %{body: "a"})
+
+      assert dream.tags != []
     end
 
     test "delete_dream/1 deletes the dream", %{user: user, dream: dream} do
