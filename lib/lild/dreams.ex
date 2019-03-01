@@ -5,6 +5,7 @@ defmodule LILD.Dreams do
 
   import Ecto.Query, warn: false
 
+  alias Ecto.Multi
   alias LILD.Repo
   alias LILD.Dreams.{Dream, Tag}
   alias LILD.Accounts.User
@@ -32,10 +33,25 @@ defmodule LILD.Dreams do
   end
 
   def create_dream(user = %User{}, attrs \\ %{}) do
-    user
-    |> Ecto.build_assoc(:dreams)
-    |> Dream.changeset(attrs)
-    |> Repo.insert()
+    Multi.new()
+    |> Multi.run(:tags, fn repo, _ ->
+      names = Map.get(attrs, "tags", Map.get(attrs, :tags, []))
+
+      try do
+        {:ok, create_tags!(names, repo)}
+      rescue
+        e in Ecto.InvalidChangesetError ->
+          {:error, e.changeset}
+      end
+    end)
+    |> Multi.run(:dream, fn repo, %{tags: tags} ->
+      user
+      |> Ecto.build_assoc(:dreams)
+      |> Dream.changeset(attrs)
+      |> Ecto.Changeset.put_assoc(:tags, tags)
+      |> repo.insert()
+    end)
+    |> Repo.transaction()
   end
 
   def update_dream(dream = %Dream{}, attrs) do
@@ -52,13 +68,13 @@ defmodule LILD.Dreams do
     Repo.all(Tag)
   end
 
-  def create_tags!(names) do
+  def create_tags!(names, repo \\ Repo) do
     names_in_db =
       names
       |> Enum.map(&Tag.changeset(%Tag{}, %{name: &1}))
-      |> Enum.map(&Repo.insert!(&1, on_conflict: :nothing))
+      |> Enum.map(&repo.insert!(&1, on_conflict: :nothing))
       |> Enum.map(& &1.name)
 
-    Tag |> where([t], t.name in ^names_in_db) |> Repo.all()
+    Tag |> where([t], t.name in ^names_in_db) |> repo.all()
   end
 end
