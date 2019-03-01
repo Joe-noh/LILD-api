@@ -23,7 +23,7 @@ defmodule LILD.DreamsTest do
       assert dream.date == dream_attrs.date
       assert dream.draft == dream_attrs.draft
       assert dream.secret == dream_attrs.secret
-      assert dream.tags |> Enum.map(& &1.name) |> Enum.sort() == dream_attrs.tags |> Enum.uniq() |> Enum.sort()
+      assert dream.tags |> Enum.map(& &1.name) |> Enum.sort() == dream_attrs.tags |> Enum.map(& &1.name) |> Enum.uniq() |> Enum.sort()
     end
 
     test "create_dream/1 with invalid data returns error changeset", %{user: user} do
@@ -31,7 +31,7 @@ defmodule LILD.DreamsTest do
     end
 
     test "create_dream/1 with invalid tag name returns error changeset", %{user: user} do
-      assert {:error, :tags, %Ecto.Changeset{}, _} = Dreams.create_dream(user, %{tags: ["whitespace included"]})
+      assert {:error, :tags, %Ecto.Changeset{}, _} = Dreams.create_dream(user, %{tags: [%{name: "whitespace included"}]})
     end
 
     test "update_dream/2 with valid data updates the dream", %{dream: dream} do
@@ -51,7 +51,7 @@ defmodule LILD.DreamsTest do
 
     test "update dream tags", %{dream: dream} do
       [name | _names] = dream.tags |> Enum.map(& &1.name)
-      {:ok, %{dream: %Dream{tags: [tag]}}} = Dreams.update_dream(dream, %{tags: [name]})
+      {:ok, %{dream: %Dream{tags: [tag]}}} = Dreams.update_dream(dream, %{tags: [%{name: name}]})
 
       assert tag.name == name
     end

@@ -35,7 +35,12 @@ defmodule LILD.Dreams do
   def create_dream(user = %User{}, attrs \\ %{}) do
     Multi.new()
     |> Multi.run(:tags, fn repo, _ ->
-      names = Map.get(attrs, "tags", Map.get(attrs, :tags, []))
+      names =
+        (Map.get(attrs, "tags") || Map.get(attrs, :tags, []))
+        |> Enum.map(fn
+          %{name: name} -> name
+          %{"name" => name} -> name
+        end)
 
       try do
         {:ok, create_tags!(names, repo)}
@@ -55,9 +60,14 @@ defmodule LILD.Dreams do
   end
 
   def update_dream(dream = %Dream{}, attrs) do
-    tag_names = Map.get(attrs, "tags") || Map.get(attrs, :tags)
+    tags = Map.get(attrs, "tags") || Map.get(attrs, :tags)
 
-    if tag_names do
+    if tags do
+      tag_names = Enum.map(tags, fn
+        %{name: name} -> name
+        %{"name" => name} -> name
+      end)
+
       update_dream_with_tags(dream, attrs, tag_names)
     else
       do_update_dream(dream, attrs)
