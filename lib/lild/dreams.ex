@@ -34,21 +34,7 @@ defmodule LILD.Dreams do
 
   def create_dream(user = %User{}, attrs \\ %{}) do
     Multi.new()
-    |> Multi.run(:tags, fn repo, _ ->
-      names =
-        (Map.get(attrs, "tags") || Map.get(attrs, :tags, []))
-        |> Enum.map(fn
-          %{name: name} -> name
-          %{"name" => name} -> name
-        end)
-
-      try do
-        {:ok, create_tags!(names, repo)}
-      rescue
-        e in Ecto.InvalidChangesetError ->
-          {:error, e.changeset}
-      end
-    end)
+    |> Multi.run(:tags, fn repo, _ -> {:ok, load_tags(repo, attrs, [])} end)
     |> Multi.run(:dream, fn repo, %{tags: tags} ->
       user
       |> Ecto.build_assoc(:dreams)
@@ -60,45 +46,17 @@ defmodule LILD.Dreams do
   end
 
   def update_dream(dream = %Dream{}, attrs) do
-    tags = Map.get(attrs, "tags") || Map.get(attrs, :tags)
+    dream = Repo.preload(dream, :tags)
 
-    if tags do
-      tag_names = Enum.map(tags, fn
-        %{name: name} -> name
-        %{"name" => name} -> name
-      end)
-
-      update_dream_with_tags(dream, attrs, tag_names)
-    else
-      do_update_dream(dream, attrs)
-    end
-  end
-
-  defp update_dream_with_tags(dream = %Dream{}, attrs, tag_names) do
     Multi.new()
-    |> Multi.run(:tags, fn repo, _ ->
-      try do
-        {:ok, create_tags!(tag_names, repo)}
-      rescue
-        e in Ecto.InvalidChangesetError ->
-          {:error, e.changeset}
-      end
-    end)
+    |> Multi.run(:tags, fn repo, _ -> {:ok, load_tags(repo, attrs, dream.tags)} end)
     |> Multi.run(:dream, fn repo, %{tags: tags} ->
       dream
-      |> repo.preload(:tags)
+      |> Repo.preload(:tags)
       |> Dream.changeset(attrs)
       |> Ecto.Changeset.put_assoc(:tags, tags)
       |> repo.update()
     end)
-    |> Repo.transaction()
-  end
-
-  defp do_update_dream(dream = %Dream{}, attrs) do
-    changeset = Dream.changeset(dream, attrs)
-
-    Multi.new()
-    |> Multi.update(:dream, changeset)
     |> Repo.transaction()
   end
 
@@ -110,13 +68,17 @@ defmodule LILD.Dreams do
     Repo.all(Tag)
   end
 
-  def create_tags!(names, repo \\ Repo) do
-    names_in_db =
-      names
-      |> Enum.map(&Tag.changeset(%Tag{}, %{name: &1}))
-      |> Enum.map(&repo.insert!(&1, on_conflict: :nothing))
-      |> Enum.map(& &1.name)
+  def create_tag(attr \\ %{}) do
+    Tag.changeset(%Tag{}, attr) |> Repo.insert()
+  end
 
-    Tag |> where([t], t.name in ^names_in_db) |> repo.all()
+  defp load_tags(repo, attrs, default) do
+    tag_ids = Map.get(attrs, :tag_ids) || Map.get(attrs, "tag_ids")
+
+    if tag_ids do
+      Tag |> where([t], t.id in ^tag_ids) |> repo.all()
+    else
+      default
+    end
   end
 end
