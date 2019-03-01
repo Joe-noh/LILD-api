@@ -9,11 +9,14 @@ defmodule LILD.Repo.Migrations.CreateTags do
       timestamps()
     end
 
+    create unique_index(:tags, [:name], name: :tags_name_index)
+
     create table(:dreams_tags, primary_key: false) do
-      add :dream_id, references(:dreams, on_delete: :nothing, type: :binary_id)
-      add :tag_id, references(:tags, on_delete: :nothing, type: :binary_id)
+      add :dream_id, :binary_id, null: false
+      add :tag_id, :binary_id, null: false
     end
 
-    create unique_index(:tags, [:name], name: :tags_name_index)
+    create index(:dreams_tags, [:dream_id])
+    create index(:dreams_tags, [:tag_id])
   end
 end
