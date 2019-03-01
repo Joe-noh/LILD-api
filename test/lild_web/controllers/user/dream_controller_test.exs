@@ -115,6 +115,11 @@ defmodule LILDWeb.DreamControllerTest do
   end
 
   defp create_dream(%{owner: owner}) do
-    Dreams.create_dream(owner, Fixture.Dreams.dream())
+    {:ok, tag1} = Dreams.create_tag(Fixture.Dreams.tag(%{name: "nightmare"}))
+    {:ok, tag2} = Dreams.create_tag(Fixture.Dreams.tag(%{name: "happy"}))
+
+    {:ok, %{dream: dream}} = Dreams.create_dream(owner, Fixture.Dreams.dream(%{tag_id: [tag1.id]}))
+
+    %{dream: dream, tags: [tag1, tag2]}
   end
 end
