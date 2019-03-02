@@ -15,11 +15,11 @@ defmodule LILD.AccountsTest do
       firebase_account_attrs = Fixture.Accounts.firebase_account()
       {:ok, %{user: user, firebase_account: firebase_account}} = Accounts.create_user(user_attrs, firebase_account_attrs)
 
-      assert user.name == user_attrs.name
-      assert user.avatar_url == user_attrs.avatar_url
-      assert firebase_account.firebase_uid == firebase_account_attrs.firebase_uid
-      assert firebase_account.provider_uid == firebase_account_attrs.provider_uid
-      assert firebase_account.provider == firebase_account_attrs.provider
+      assert user.name == user_attrs["name"]
+      assert user.avatar_url == user_attrs["avatar_url"]
+      assert firebase_account.firebase_uid == firebase_account_attrs["firebase_uid"]
+      assert firebase_account.provider_uid == firebase_account_attrs["provider_uid"]
+      assert firebase_account.provider == firebase_account_attrs["provider"]
     end
 
     test "create_user/1 with invalid data returns error changeset" do
@@ -30,8 +30,8 @@ defmodule LILD.AccountsTest do
       update_attrs = Fixture.Accounts.user()
 
       assert {:ok, user} = Accounts.update_user(user, update_attrs)
-      assert user.name == update_attrs.name
-      assert user.avatar_url == update_attrs.avatar_url
+      assert user.name == update_attrs["name"]
+      assert user.avatar_url == update_attrs["avatar_url"]
     end
 
     test "update_user/2 with invalid data returns error changeset", %{user: user} do
