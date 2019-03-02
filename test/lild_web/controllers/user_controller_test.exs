@@ -6,8 +6,8 @@ defmodule LILDWeb.UserControllerTest do
 
   @firebase_response Fixture.Accounts.firebase_id_token_payload()
 
-  describe "create user" do
-    test_with_mock "renders user when data is valid", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
+  describe "create" do
+    test_with_mock "ユーザを登録する", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
       params = Fixture.Accounts.user(%{"id_token" => "firebase.id_token"})
 
       data =
@@ -20,7 +20,7 @@ defmodule LILDWeb.UserControllerTest do
       assert data["avatar_url"] == params["avatar_url"]
     end
 
-    test_with_mock "renders errors when data is invalid", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
+    test_with_mock "パラメータがよくないときは422", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
       errors =
         post(conn, Routes.user_path(conn, :create), user: %{})
         |> json_response(422)
@@ -30,10 +30,10 @@ defmodule LILDWeb.UserControllerTest do
     end
   end
 
-  describe "update user" do
+  describe "update" do
     setup [:create_users, :login_as_owner]
 
-    test "renders user when data is valid", %{conn: conn, owner: owner} do
+    test "ユーザを更新する", %{conn: conn, owner: owner} do
       params = Fixture.Accounts.user()
 
       data =
@@ -46,7 +46,7 @@ defmodule LILDWeb.UserControllerTest do
       assert data["avatar_url"] == params["avatar_url"]
     end
 
-    test "renders errors when data is invalid", %{conn: conn, owner: owner} do
+    test "パラメータがよくないときは422", %{conn: conn, owner: owner} do
       errors =
         put(conn, Routes.user_path(conn, :update, owner), user: %{name: ''})
         |> json_response(422)
@@ -55,7 +55,7 @@ defmodule LILDWeb.UserControllerTest do
       assert errors != %{}
     end
 
-    test "401 when not logged in", %{conn: conn, owner: owner} do
+    test "ログインしてないときは401", %{conn: conn, owner: owner} do
       errors =
         Plug.Conn.assign(conn, :current_user, nil)
         |> put(Routes.user_path(conn, :update, owner))
@@ -65,7 +65,7 @@ defmodule LILDWeb.UserControllerTest do
       assert errors != %{}
     end
 
-    test "401 for another users", %{conn: conn, owner: owner, another: another} do
+    test "他人のことは更新できない", %{conn: conn, owner: owner, another: another} do
       errors =
         Plug.Conn.assign(conn, :current_user, another)
         |> put(Routes.user_path(conn, :update, owner))
@@ -76,10 +76,10 @@ defmodule LILDWeb.UserControllerTest do
     end
   end
 
-  describe "delete user" do
+  describe "delete" do
     setup [:create_users, :login_as_owner]
 
-    test "deletes chosen user", %{conn: conn, owner: owner} do
+    test "ユーザを削除する", %{conn: conn, owner: owner} do
       assert delete(conn, Routes.user_path(conn, :delete, owner)) |> response(204)
 
       assert_error_sent 404, fn ->
@@ -87,7 +87,7 @@ defmodule LILDWeb.UserControllerTest do
       end
     end
 
-    test "401 when not logged in", %{conn: conn, owner: owner} do
+    test "ログインしてないときは401", %{conn: conn, owner: owner} do
       errors =
         Plug.Conn.assign(conn, :current_user, nil)
         |> delete(Routes.user_path(conn, :delete, owner))
@@ -97,7 +97,7 @@ defmodule LILDWeb.UserControllerTest do
       assert errors != %{}
     end
 
-    test "401 for another users", %{conn: conn, owner: owner, another: another} do
+    test "他人のことは消せない", %{conn: conn, owner: owner, another: another} do
       errors =
         Plug.Conn.assign(conn, :current_user, another)
         |> delete(Routes.user_path(conn, :delete, owner))
