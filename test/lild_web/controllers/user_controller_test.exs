@@ -8,7 +8,7 @@ defmodule LILDWeb.UserControllerTest do
 
   describe "create user" do
     test_with_mock "renders user when data is valid", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
-      params = Fixture.Accounts.user(%{id_token: "firebase.id_token"})
+      params = Fixture.Accounts.user(%{"id_token" => "firebase.id_token"})
 
       data =
         post(conn, Routes.user_path(conn, :create), user: params)
@@ -16,8 +16,8 @@ defmodule LILDWeb.UserControllerTest do
         |> Map.get("data")
 
       assert data["id"] |> is_binary
-      assert data["name"] == params[:name]
-      assert data["avatar_url"] == params[:avatar_url]
+      assert data["name"] == params["name"]
+      assert data["avatar_url"] == params["avatar_url"]
     end
 
     test_with_mock "renders errors when data is invalid", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
@@ -42,8 +42,8 @@ defmodule LILDWeb.UserControllerTest do
         |> Map.get("data")
 
       assert data["id"] |> is_binary
-      assert data["name"] == params[:name]
-      assert data["avatar_url"] == params[:avatar_url]
+      assert data["name"] == params["name"]
+      assert data["avatar_url"] == params["avatar_url"]
     end
 
     test "renders errors when data is invalid", %{conn: conn, owner: owner} do

@@ -8,40 +8,74 @@ defmodule LILD.DreamsTest do
     setup [:create_user, :create_dream]
 
     test "list_dreams/0 returns all dreams", %{dream: dream} do
-      assert Dreams.list_dreams() == [dream]
+      assert Dreams.list_dreams() |> Enum.map(& &1.id) == [dream.id]
     end
 
     test "get_dream!/1 returns the dream with given id", %{user: user, dream: dream} do
-      assert Dreams.get_dream!(user, dream.id) == dream
+      assert Dreams.get_dream!(user, dream.id) |> Map.get(:id) == dream.id
     end
 
-    test "create_dream/1 with valid data creates a dream", %{user: user} do
-      dream_attrs = Fixture.Dreams.dream()
-      {:ok, dream} = Dreams.create_dream(user, dream_attrs)
+    test "create_dream/1 with valid data creates a dream", %{user: user, tags: tags} do
+      tag_names = Enum.map(tags, & &1.name)
+      dream_attrs = Fixture.Dreams.dream(%{"tags" => tag_names})
+      {:ok, %{dream: dream}} = Dreams.create_dream(user, dream_attrs)
 
-      assert dream.body == dream_attrs.body
-      assert dream.date == dream_attrs.date
-      assert dream.draft == dream_attrs.draft
-      assert dream.secret == dream_attrs.secret
+      assert dream.body == dream_attrs["body"]
+      assert dream.date == dream_attrs["date"]
+      assert dream.draft == dream_attrs["draft"]
+      assert dream.secret == dream_attrs["secret"]
+      assert dream.tags |> Enum.map(& &1.name) |> Enum.sort() == tags |> Enum.map(& &1.name) |> Enum.uniq() |> Enum.sort()
     end
 
     test "create_dream/1 with invalid data returns error changeset", %{user: user} do
-      assert {:error, %Ecto.Changeset{}} = Dreams.create_dream(user, %{body: ''})
+      assert {:error, :dream, %Ecto.Changeset{}, _} = Dreams.create_dream(user, %{"body" => ""})
+    end
+
+    test "create_dream/1 creates non-existent tag", %{user: user} do
+      dream_attrs = Fixture.Dreams.dream(%{"tags" => ["foooo"]})
+      {:ok, %{dream: %Dream{tags: [tag]}}} = Dreams.create_dream(user, dream_attrs)
+
+      assert tag.name == "foooo"
     end
 
     test "update_dream/2 with valid data updates the dream", %{dream: dream} do
       dream_attrs = Fixture.Dreams.dream()
-      {:ok, dream} = Dreams.update_dream(dream, dream_attrs)
+      {:ok, %{dream: dream}} = Dreams.update_dream(dream, dream_attrs)
 
-      assert dream.body == dream_attrs.body
-      assert dream.date == dream_attrs.date
-      assert dream.draft == dream_attrs.draft
-      assert dream.secret == dream_attrs.secret
+      assert dream.body == dream_attrs["body"]
+      assert dream.date == dream_attrs["date"]
+      assert dream.draft == dream_attrs["draft"]
+      assert dream.secret == dream_attrs["secret"]
     end
 
     test "update_dream/2 with invalid data returns error changeset", %{user: user, dream: dream} do
-      assert {:error, %Ecto.Changeset{}} = Dreams.update_dream(dream, %{body: ''})
-      assert dream == Dreams.get_dream!(user, dream.id)
+      assert {:error, :dream, %Ecto.Changeset{}, _} = Dreams.update_dream(dream, %{"body" => ""})
+      assert Dreams.get_dream!(user, dream.id) |> Map.get(:body) == dream.body
+    end
+
+    test "update dream with existing tag", %{dream: dream, tags: [tag | _]} do
+      {:ok, %{dream: %Dream{tags: [new_tag]}}} = Dreams.update_dream(dream, %{"tags" => [tag.name]})
+
+      assert new_tag.name == tag.name
+    end
+
+    test "updating with %{tags => []} removes all tags", %{dream: dream} do
+      {:ok, %{dream: dream}} = Dreams.update_dream(dream, %{"tags" => []})
+
+      assert dream.tags == []
+    end
+
+    test "updating without :tags remains current tags", %{dream: dream, tags: [_tag1, tag2]} do
+      {:ok, %{dream: dream}} = Dreams.update_dream(dream, %{"tags" => [tag2.name]})
+
+      assert dream.tags != []
+    end
+
+    test "update_dream/2 creates non-existent tag", %{dream: dream} do
+      dream_attrs = Fixture.Dreams.dream(%{"tags" => ["foooo"]})
+      {:ok, %{dream: %Dream{tags: [tag]}}} = Dreams.update_dream(dream, dream_attrs)
+
+      assert tag.name == "foooo"
     end
 
     test "delete_dream/1 deletes the dream", %{user: user, dream: dream} do
@@ -58,8 +92,9 @@ defmodule LILD.DreamsTest do
   end
 
   defp create_dream(%{user: user}) do
-    {:ok, dream} = Dreams.create_dream(user, Fixture.Dreams.dream())
+    {:ok, tags = [tag | _]} = Dreams.create_tags(["nightmare", "予知夢好きと繋がりたい"])
+    {:ok, %{dream: dream}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"tags" => [tag.name]}))
 
-    %{dream: dream}
+    %{dream: dream, tags: tags}
   end
 end
