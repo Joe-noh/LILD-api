@@ -76,11 +76,7 @@ defmodule LILD.Dreams do
     Repo.all(Tag)
   end
 
-  def create_tag(attr \\ %{}) do
-    Tag.changeset(%Tag{}, attr) |> Repo.insert()
-  end
-
-  defp create_tags(names, repo) do
+  def create_tags(names, repo \\ Repo) do
     names
     |> Enum.map(& Tag.changeset(%Tag{}, %{name: &1}))
     |> Enum.map(& repo.insert(&1, on_conflict: :nothing))
