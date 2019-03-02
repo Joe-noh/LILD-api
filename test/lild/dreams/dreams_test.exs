@@ -4,16 +4,24 @@ defmodule LILD.DreamsTest do
   alias LILD.{Dreams, Accounts}
   alias LILD.Dreams.Dream
 
-  describe "dreams" do
+  describe "list_dreams" do
     setup [:create_user, :create_dream]
 
-    test "list_dreams/0 returns all dreams", %{dream: dream} do
+    test "returns all dreams", %{dream: dream} do
       assert Dreams.list_dreams() |> Enum.map(& &1.id) == [dream.id]
     end
+  end
 
-    test "get_dream!/1 returns the dream with given id", %{user: user, dream: dream} do
+  describe "get_dream!" do
+    setup [:create_user, :create_dream]
+
+    test "returns the dream with given id", %{user: user, dream: dream} do
       assert Dreams.get_dream!(user, dream.id) |> Map.get(:id) == dream.id
     end
+  end
+
+  describe "create_dream" do
+    setup [:create_user, :create_dream]
 
     test "create_dream/1 with valid data creates a dream", %{user: user, tags: tags} do
       tag_names = Enum.map(tags, & &1.name)
@@ -37,6 +45,10 @@ defmodule LILD.DreamsTest do
 
       assert tag.name == "foooo"
     end
+  end
+
+  describe "update_dream" do
+    setup [:create_user, :create_dream]
 
     test "update_dream/2 with valid data updates the dream", %{dream: dream} do
       dream_attrs = Fixture.Dreams.dream()
@@ -77,6 +89,10 @@ defmodule LILD.DreamsTest do
 
       assert tag.name == "foooo"
     end
+  end
+
+  describe "delete_dream" do
+    setup [:create_user, :create_dream]
 
     test "delete_dream/1 deletes the dream", %{user: user, dream: dream} do
       assert {:ok, %Dream{}} = Dreams.delete_dream(dream)
