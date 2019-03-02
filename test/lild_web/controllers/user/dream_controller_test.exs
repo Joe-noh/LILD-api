@@ -28,15 +28,15 @@ defmodule LILDWeb.DreamControllerTest do
         |> Map.get("data")
 
       assert data["id"] |> is_binary
-      assert data["body"] == params[:body]
-      assert data["date"] == params[:date] |> to_string()
-      assert data["secret"] == params[:secret]
-      assert data["draft"] == params[:draft]
+      assert data["body"] == params["body"]
+      assert data["date"] == params["date"] |> to_string()
+      assert data["secret"] == params["secret"]
+      assert data["draft"] == params["draft"]
     end
 
     test "renders errors when data is invalid", %{conn: conn, owner: owner} do
       errors =
-        post(conn, Routes.user_dream_path(conn, :create, owner), dream: %{body: ''})
+        post(conn, Routes.user_dream_path(conn, :create, owner), dream: %{"body" => ""})
         |> json_response(422)
         |> Map.get("errors")
 
@@ -56,15 +56,15 @@ defmodule LILDWeb.DreamControllerTest do
         |> Map.get("data")
 
       assert data["id"] |> is_binary
-      assert data["body"] == params[:body]
-      assert data["date"] == params[:date] |> to_string()
-      assert data["secret"] == params[:secret]
-      assert data["draft"] == params[:draft]
+      assert data["body"] == params["body"]
+      assert data["date"] == params["date"] |> to_string()
+      assert data["secret"] == params["secret"]
+      assert data["draft"] == params["draft"]
     end
 
     test "renders errors when data is invalid", %{conn: conn, owner: owner, dream: dream} do
       errors =
-        put(conn, Routes.user_dream_path(conn, :update, owner, dream), dream: %{body: ''})
+        put(conn, Routes.user_dream_path(conn, :update, owner, dream), dream: %{"body" => ""})
         |> json_response(422)
         |> Map.get("errors")
 
@@ -115,10 +115,10 @@ defmodule LILDWeb.DreamControllerTest do
   end
 
   defp create_dream(%{owner: owner}) do
-    {:ok, tag1} = Dreams.create_tag(Fixture.Dreams.tag(%{name: "nightmare"}))
-    {:ok, tag2} = Dreams.create_tag(Fixture.Dreams.tag(%{name: "happy"}))
+    {:ok, tag1} = Dreams.create_tag(Fixture.Dreams.tag(%{"name" => "nightmare"}))
+    {:ok, tag2} = Dreams.create_tag(Fixture.Dreams.tag(%{"name" => "happy"}))
 
-    {:ok, %{dream: dream}} = Dreams.create_dream(owner, Fixture.Dreams.dream(%{tag_id: [tag1.id]}))
+    {:ok, %{dream: dream}} = Dreams.create_dream(owner, Fixture.Dreams.dream(%{"tag_ids" => [tag1.id]}))
 
     %{dream: dream, tags: [tag1, tag2]}
   end
