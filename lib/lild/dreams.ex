@@ -34,7 +34,11 @@ defmodule LILD.Dreams do
 
   def create_dream(user = %User{}, attrs \\ %{}) do
     Multi.new()
-    |> Multi.run(:tags, fn repo, _ -> {:ok, load_tags(repo, attrs, [])} end)
+    |> Multi.run(:tags, fn repo, _ ->
+      attrs
+      |> Map.get("tags", [])
+      |> create_tags(repo)
+    end)
     |> Multi.run(:dream, fn repo, %{tags: tags} ->
       user
       |> Ecto.build_assoc(:dreams)
@@ -49,7 +53,11 @@ defmodule LILD.Dreams do
     dream = Repo.preload(dream, :tags)
 
     Multi.new()
-    |> Multi.run(:tags, fn repo, _ -> {:ok, load_tags(repo, attrs, dream.tags)} end)
+    |> Multi.run(:tags, fn repo, _ ->
+      attrs
+      |> Map.get("tags", [])
+      |> create_tags(repo)
+    end)
     |> Multi.run(:dream, fn repo, %{tags: tags} ->
       dream
       |> Repo.preload(:tags)
@@ -72,13 +80,18 @@ defmodule LILD.Dreams do
     Tag.changeset(%Tag{}, attr) |> Repo.insert()
   end
 
-  defp load_tags(repo, attrs, default) do
-    tag_ids = Map.get(attrs, :tag_ids) || Map.get(attrs, "tag_ids")
+  defp create_tags(names, repo) do
+    names
+    |> Enum.map(& Tag.changeset(%Tag{}, %{name: &1}))
+    |> Enum.map(& repo.insert(&1, on_conflict: :nothing))
+    |> Enum.filter(& match?({:ok, _}, &1))
+    |> Enum.map(fn {:ok, tag} -> tag.name end)
+    |> get_tags_by_name(repo)
+  end
 
-    if tag_ids do
-      Tag |> where([t], t.id in ^tag_ids) |> repo.all()
-    else
-      default
-    end
+  defp get_tags_by_name(names, repo) do
+    tags = Tag |> where([t], t.name in ^names) |> repo.all()
+
+    {:ok, tags}
   end
 end
