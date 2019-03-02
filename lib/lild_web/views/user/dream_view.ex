@@ -11,10 +11,6 @@ defmodule LILDWeb.User.DreamView do
   end
 
   def render("dream.json", %{dream: dream}) do
-    %{id: dream.id,
-      body: dream.body,
-      date: dream.date,
-      secret: dream.secret,
-      draft: dream.draft}
+    %{id: dream.id, body: dream.body, date: dream.date, secret: dream.secret, draft: dream.draft}
   end
 end
