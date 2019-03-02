@@ -78,9 +78,9 @@ defmodule LILD.Dreams do
 
   def create_tags(names, repo \\ Repo) do
     names
-    |> Enum.map(& Tag.changeset(%Tag{}, %{name: &1}))
-    |> Enum.map(& repo.insert(&1, on_conflict: :nothing))
-    |> Enum.filter(& match?({:ok, _}, &1))
+    |> Enum.map(&Tag.changeset(%Tag{}, %{name: &1}))
+    |> Enum.map(&repo.insert(&1, on_conflict: :nothing))
+    |> Enum.filter(&match?({:ok, _}, &1))
     |> Enum.map(fn {:ok, tag} -> tag.name end)
     |> get_tags_by_name(repo)
   end

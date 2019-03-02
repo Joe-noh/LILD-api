@@ -3,12 +3,16 @@ defmodule LILD.AccountsTest do
 
   alias LILD.Accounts
 
-  describe "users" do
+  describe "get_user!" do
     setup [:create_user]
 
     test "get_user!/1 returns the user with given id", %{user: user} do
       assert Accounts.get_user!(user.id) == user
     end
+  end
+
+  describe "create_user" do
+    setup [:create_user]
 
     test "create_user/1 with valid data creates a user" do
       user_attrs = Fixture.Accounts.user()
@@ -25,6 +29,10 @@ defmodule LILD.AccountsTest do
     test "create_user/1 with invalid data returns error changeset" do
       assert {:error, _, %Ecto.Changeset{}, _} = Accounts.create_user(%{}, %{})
     end
+  end
+
+  describe "update_user" do
+    setup [:create_user]
 
     test "update_user/2 with valid data updates the user", %{user: user} do
       update_attrs = Fixture.Accounts.user()
@@ -38,6 +46,10 @@ defmodule LILD.AccountsTest do
       assert {:error, %Ecto.Changeset{}} = Accounts.update_user(user, %{name: ''})
       assert user == Accounts.get_user!(user.id)
     end
+  end
+
+  describe "delete_user" do
+    setup [:create_user]
 
     test "delete_user/1 deletes the user", %{user: user} do
       assert {:ok, %{user: _, firebase_account: _}} = Accounts.delete_user(user)
