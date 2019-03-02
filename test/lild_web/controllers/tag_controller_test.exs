@@ -3,28 +3,23 @@ defmodule LILDWeb.TagControllerTest do
 
   alias LILD.Dreams
 
-  @create_attrs %{
-    name: "some name"
-  }
-
-  def fixture(:tag) do
-    {:ok, tag} = Dreams.create_tag(@create_attrs)
-    tag
-  end
-
-  setup %{conn: conn} do
-    {:ok, conn: put_req_header(conn, "accept", "application/json")}
-  end
+  setup [:create_tag]
 
   describe "index" do
-    test "lists all tags", %{conn: conn} do
-      conn = get(conn, Routes.tag_path(conn, :index))
-      assert json_response(conn, 200)["data"] == []
+    test "lists all tags", %{conn: conn, tags: tags} do
+      ids =
+        get(conn, Routes.tag_path(conn, :index))
+        |> json_response(200)
+        |> Map.get("data")
+        |> Enum.map(&Map.get(&1, "id"))
+
+      Enum.each(tags, fn tag -> assert tag.id in ids end)
     end
   end
 
   defp create_tag(_) do
-    tag = fixture(:tag)
-    {:ok, tag: tag}
+    {:ok, tags} = Dreams.create_tags(["nightmare", "予知夢好きと繋がりたい"])
+
+    %{tags: tags}
   end
 end

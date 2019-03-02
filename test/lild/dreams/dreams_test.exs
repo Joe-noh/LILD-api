@@ -92,11 +92,9 @@ defmodule LILD.DreamsTest do
   end
 
   defp create_dream(%{user: user}) do
-    {:ok, tag1} = Dreams.create_tag(Fixture.Dreams.tag(%{"name" => "nightmare"}))
-    {:ok, tag2} = Dreams.create_tag(Fixture.Dreams.tag(%{"name" => "happy"}))
+    {:ok, tags = [tag | _]} = Dreams.create_tags(["nightmare", "予知夢好きと繋がりたい"])
+    {:ok, %{dream: dream}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"tags" => [tag.name]}))
 
-    {:ok, %{dream: dream}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"tags" => [tag1.name]}))
-
-    %{dream: dream, tags: [tag1, tag2]}
+    %{dream: dream, tags: tags}
   end
 end
