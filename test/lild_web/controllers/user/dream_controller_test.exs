@@ -8,7 +8,7 @@ defmodule LILDWeb.DreamControllerTest do
   describe "index" do
     setup [:create_dream]
 
-    test "lists all dreams", %{conn: conn, owner: owner, dream: dream} do
+    test "すべての夢を返す", %{conn: conn, owner: owner, dream: dream} do
       [first | _] =
         get(conn, Routes.user_dream_path(conn, :index, owner))
         |> json_response(200)
@@ -18,9 +18,9 @@ defmodule LILDWeb.DreamControllerTest do
     end
   end
 
-  describe "create dream" do
-    test "renders dream when data is valid", %{conn: conn, owner: owner} do
-      params = Fixture.Dreams.dream()
+  describe "create" do
+    test "夢とタグをつくる", %{conn: conn, owner: owner} do
+      params = Fixture.Dreams.dream(%{"tags" => ["ハッピー"]})
 
       data =
         post(conn, Routes.user_dream_path(conn, :create, owner), dream: params)
@@ -34,9 +34,11 @@ defmodule LILDWeb.DreamControllerTest do
       assert data["draft"] == params["draft"]
     end
 
-    test "renders errors when data is invalid", %{conn: conn, owner: owner} do
+    test "パラメータがよくないときは422", %{conn: conn, owner: owner} do
+      params = Fixture.Dreams.dream(%{"body" => "", "tags" => ["ハッピー"]})
+
       errors =
-        post(conn, Routes.user_dream_path(conn, :create, owner), dream: %{"body" => ""})
+        post(conn, Routes.user_dream_path(conn, :create, owner), dream: params)
         |> json_response(422)
         |> Map.get("errors")
 
@@ -44,11 +46,11 @@ defmodule LILDWeb.DreamControllerTest do
     end
   end
 
-  describe "update dream" do
+  describe "update" do
     setup [:create_dream]
 
-    test "renders dream when data is valid", %{conn: conn, owner: owner, dream: dream} do
-      params = Fixture.Dreams.dream()
+    test "夢とタグを更新する", %{conn: conn, owner: owner, dream: dream} do
+      params = Fixture.Dreams.dream(%{"tags" => ["ハッピー"]})
 
       data =
         put(conn, Routes.user_dream_path(conn, :update, owner, dream), dream: params)
@@ -62,7 +64,7 @@ defmodule LILDWeb.DreamControllerTest do
       assert data["draft"] == params["draft"]
     end
 
-    test "renders errors when data is invalid", %{conn: conn, owner: owner, dream: dream} do
+    test "パラメータがよくないときは422", %{conn: conn, owner: owner, dream: dream} do
       errors =
         put(conn, Routes.user_dream_path(conn, :update, owner, dream), dream: %{"body" => ""})
         |> json_response(422)
@@ -71,7 +73,7 @@ defmodule LILDWeb.DreamControllerTest do
       assert errors != %{}
     end
 
-    test "401 for another user", %{conn: conn, owner: owner, another: another, dream: dream} do
+    test "他人の夢は更新できない", %{conn: conn, owner: owner, another: another, dream: dream} do
       params = Fixture.Dreams.dream()
 
       errors =
@@ -84,15 +86,15 @@ defmodule LILDWeb.DreamControllerTest do
     end
   end
 
-  describe "delete dream" do
+  describe "delete" do
     setup [:create_dream]
 
-    test "deletes chosen dream", %{conn: conn, owner: owner, dream: dream} do
+    test "夢を消す", %{conn: conn, owner: owner, dream: dream} do
       conn = delete(conn, Routes.user_dream_path(conn, :delete, owner, dream))
       assert response(conn, 204)
     end
 
-    test "401 for another user", %{conn: conn, owner: owner, another: another, dream: dream} do
+    test "他人の夢は消せない", %{conn: conn, owner: owner, another: another, dream: dream} do
       errors =
         assign(conn, :current_user, another)
         |> delete(Routes.user_dream_path(conn, :delete, owner, dream))

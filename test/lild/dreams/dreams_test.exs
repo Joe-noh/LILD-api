@@ -2,12 +2,12 @@ defmodule LILD.DreamsTest do
   use LILD.DataCase, async: true
 
   alias LILD.{Dreams, Accounts}
-  alias LILD.Dreams.Dream
+  alias LILD.Dreams.{Dream, Tag}
 
   describe "list_dreams" do
     setup [:create_user, :create_dream]
 
-    test "returns all dreams", %{dream: dream} do
+    test "夢をすべて返す", %{dream: dream} do
       assert Dreams.list_dreams() |> Enum.map(& &1.id) == [dream.id]
     end
   end
@@ -15,7 +15,7 @@ defmodule LILD.DreamsTest do
   describe "get_dream!" do
     setup [:create_user, :create_dream]
 
-    test "returns the dream with given id", %{user: user, dream: dream} do
+    test "IDをもとに夢を返す", %{user: user, dream: dream} do
       assert Dreams.get_dream!(user, dream.id) |> Map.get(:id) == dream.id
     end
   end
@@ -23,8 +23,8 @@ defmodule LILD.DreamsTest do
   describe "create_dream" do
     setup [:create_user, :create_dream]
 
-    test "create_dream/1 with valid data creates a dream", %{user: user, tags: tags} do
-      tag_names = Enum.map(tags, & &1.name)
+    test "夢をつくる", %{user: user, tags: tags} do
+      tag_names = Enum.map(tags, & &1.name) |> Enum.sort()
       dream_attrs = Fixture.Dreams.dream(%{"tags" => tag_names})
       {:ok, %{dream: dream}} = Dreams.create_dream(user, dream_attrs)
 
@@ -32,26 +32,27 @@ defmodule LILD.DreamsTest do
       assert dream.date == dream_attrs["date"]
       assert dream.draft == dream_attrs["draft"]
       assert dream.secret == dream_attrs["secret"]
-      assert dream.tags |> Enum.map(& &1.name) |> Enum.sort() == tags |> Enum.map(& &1.name) |> Enum.uniq() |> Enum.sort()
+      assert dream.tags |> Enum.map(& &1.name) |> Enum.sort() == tag_names
     end
 
-    test "create_dream/1 with invalid data returns error changeset", %{user: user} do
+    test "パラメータがよくないときはエラーを返す", %{user: user} do
       assert {:error, :dream, %Ecto.Changeset{}, _} = Dreams.create_dream(user, %{"body" => ""})
     end
 
-    test "create_dream/1 creates non-existent tag", %{user: user} do
+    test "タグがないときはつくる", %{user: user} do
       dream_attrs = Fixture.Dreams.dream(%{"tags" => ["foooo"]})
       {:ok, %{dream: %Dream{tags: [tag]}}} = Dreams.create_dream(user, dream_attrs)
 
       assert tag.name == "foooo"
+      assert Tag |> where(name: "foooo") |> Repo.one()
     end
   end
 
   describe "update_dream" do
     setup [:create_user, :create_dream]
 
-    test "update_dream/2 with valid data updates the dream", %{dream: dream} do
-      dream_attrs = Fixture.Dreams.dream()
+    test "夢を更新する", %{dream: dream} do
+      dream_attrs = Fixture.Dreams.dream(%{"tags" => ["ハッピー"]})
       {:ok, %{dream: dream}} = Dreams.update_dream(dream, dream_attrs)
 
       assert dream.body == dream_attrs["body"]
@@ -60,46 +61,53 @@ defmodule LILD.DreamsTest do
       assert dream.secret == dream_attrs["secret"]
     end
 
-    test "update_dream/2 with invalid data returns error changeset", %{user: user, dream: dream} do
+    test "パラメータがよくないときはエラーを返す", %{user: user, dream: dream} do
       assert {:error, :dream, %Ecto.Changeset{}, _} = Dreams.update_dream(dream, %{"body" => ""})
       assert Dreams.get_dream!(user, dream.id) |> Map.get(:body) == dream.body
     end
 
-    test "update dream with existing tag", %{dream: dream, tags: [tag | _]} do
+    test "タグを差し替える", %{dream: dream, tags: [_tag, tag]} do
       {:ok, %{dream: %Dream{tags: [new_tag]}}} = Dreams.update_dream(dream, %{"tags" => [tag.name]})
 
       assert new_tag.name == tag.name
     end
 
-    test "updating with %{tags => []} removes all tags", %{dream: dream} do
+    test "タグを外せる", %{dream: dream} do
       {:ok, %{dream: dream}} = Dreams.update_dream(dream, %{"tags" => []})
 
       assert dream.tags == []
     end
 
-    test "updating without :tags remains current tags", %{dream: dream, tags: [_tag1, tag2]} do
-      {:ok, %{dream: dream}} = Dreams.update_dream(dream, %{"tags" => [tag2.name]})
+    test "タグがないときはつくる", %{dream: dream} do
+      refute Tag |> where(name: "foooo") |> Repo.one()
 
-      assert dream.tags != []
-    end
-
-    test "update_dream/2 creates non-existent tag", %{dream: dream} do
       dream_attrs = Fixture.Dreams.dream(%{"tags" => ["foooo"]})
       {:ok, %{dream: %Dream{tags: [tag]}}} = Dreams.update_dream(dream, dream_attrs)
 
       assert tag.name == "foooo"
+      assert Tag |> where(name: "foooo") |> Repo.one()
     end
   end
 
   describe "delete_dream" do
     setup [:create_user, :create_dream]
 
-    test "delete_dream/1 deletes the dream", %{user: user, dream: dream} do
+    test "夢を消す", %{user: user, dream: dream} do
       assert {:ok, %Dream{}} = Dreams.delete_dream(dream)
 
       assert_raise Ecto.NoResultsError, fn ->
         Dreams.get_dream!(user, dream.id)
       end
+    end
+
+    test "タグは消さない", %{dream: dream} do
+      tags = dream.tags
+
+      assert {:ok, %Dream{}} = Dreams.delete_dream(dream)
+
+      Enum.each(tags, fn tag ->
+        assert Tag |> where(name: ^tag.name) |> Repo.one()
+      end)
     end
   end
 
