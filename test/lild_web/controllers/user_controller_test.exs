@@ -18,29 +18,31 @@ defmodule LILDWeb.UserControllerTest do
 
   describe "create" do
     test_with_mock "レスポンスがAPIドキュメントと乖離していない", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
-      params = Fixture.Accounts.user(%{"id_token" => "firebase.id_token"})
+      user_params = Fixture.Accounts.user()
+      firebase_params = Fixture.Accounts.firebase()
 
-      post(conn, Routes.user_path(conn, :create), user: params)
+      post(conn, Routes.user_path(conn, :create), user: user_params, firebase: firebase_params)
       |> json_response(201)
-      |> assert_schema("UserResponse", LILDWeb.ApiSpec.spec())
+      |> assert_schema("SessionResponse", LILDWeb.ApiSpec.spec())
     end
 
     test_with_mock "ユーザを登録する", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
-      params = Fixture.Accounts.user(%{"id_token" => "firebase.id_token"})
+      user_params = Fixture.Accounts.user()
+      firebase_params = Fixture.Accounts.firebase()
 
       data =
-        post(conn, Routes.user_path(conn, :create), user: params)
+        post(conn, Routes.user_path(conn, :create), user: user_params, firebase: firebase_params)
         |> json_response(201)
         |> Map.get("data")
 
-      assert data["id"] |> is_binary
-      assert data["name"] == params["name"]
-      assert data["avatar_url"] == params["avatar_url"]
+      assert data["user"]["id"] |> is_binary
+      assert data["user"]["name"] == user_params["name"]
+      assert data["user"]["avatar_url"] == user_params["avatar_url"]
     end
 
     test_with_mock "パラメータがよくないときは422", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
       errors =
-        post(conn, Routes.user_path(conn, :create), user: %{})
+        post(conn, Routes.user_path(conn, :create), user: %{}, firebase: Fixture.Accounts.firebase())
         |> json_response(422)
         |> Map.get("errors")
 

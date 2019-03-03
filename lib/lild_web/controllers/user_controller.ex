@@ -14,13 +14,15 @@ defmodule LILDWeb.UserController do
     render(conn, "show.json", user: user)
   end
 
-  def create(conn, %{"user" => user_params}) do
-    with {:ok, payload} <- Accounts.verify_id_token(Map.get(user_params, "id_token")),
+  def create(conn, %{"user" => user_params, "firebase" => %{"id_token" => id_token}}) do
+    with {:ok, payload} <- Accounts.verify_id_token(id_token),
          firebase_account_params = extract_firebase_account_params(payload),
-         {:ok, %{user: %User{} = user}} <- Accounts.create_user(user_params, firebase_account_params) do
+         {:ok, %{user: %User{} = user}} <- Accounts.create_user(user_params, firebase_account_params),
+         {:ok, token, _payload} <- LILDWeb.AccessToken.encode(user) do
       conn
       |> put_status(:created)
-      |> render("show.json", user: user)
+      |> put_view(LILDWeb.SessionView)
+      |> render("show.json", user: user, token: token)
     else
       {:error, _, changeset, _} ->
         {:error, changeset}
@@ -94,7 +96,7 @@ defmodule LILDWeb.UserController do
       summary: "Signup",
       description: "Create a user.",
       operationId: "users.create",
-      requestBody: Operation.request_body("User parameters", "application/json", LILDWeb.Schemas.SignupRequest),
+      requestBody: Operation.request_body("Signup parameters", "application/json", LILDWeb.Schemas.SignupRequest),
       responses: %{
         201 => Operation.response("User", "application/json", LILDWeb.Schemas.SessionResponse)
       }

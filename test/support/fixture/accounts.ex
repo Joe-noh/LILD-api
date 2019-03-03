@@ -14,6 +14,12 @@ defmodule LILD.Fixture.Accounts do
     })
   end
 
+  def firebase(attrs \\ %{}) do
+    LILD.Fixture.merge(attrs, %{
+      "id_token" => "firebase.id.token"
+    })
+  end
+
   def firebase_id_token_payload do
     %{
       "aud" => "lild-dev",
