@@ -4,11 +4,11 @@ defmodule LILD.DreamsTest do
   alias LILD.{Dreams, Accounts}
   alias LILD.Dreams.{Dream, Tag}
 
-  describe "list_dreams" do
+  describe "dreams_query" do
     setup [:create_user, :create_dream]
 
-    test "夢をすべて返す", %{dream: dream} do
-      assert Dreams.list_dreams() |> Enum.map(& &1.id) == [dream.id]
+    test "夢をすべて返すクエリを返す", %{dream: dream} do
+      assert Dreams.dreams_query() |> Repo.all() |> Enum.map(& &1.id) == [dream.id]
     end
   end
 

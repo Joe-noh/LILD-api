@@ -11,9 +11,15 @@ defmodule LILDWeb.User.DreamController do
 
   action_fallback LILDWeb.FallbackController
 
-  def index(conn, _params) do
-    dreams = conn.assigns.user |> Dreams.list_dreams()
-    render(conn, "index.json", dreams: dreams)
+  def index(conn, params) do
+    pagenate_opts = [cursor_fields: [:date, :inserted_at], before: params["before"], after: params["after"]]
+
+    %{entries: dreams, metadata: metadata} =
+      conn.assigns.user
+      |> Dreams.dreams_query()
+      |> LILD.Repo.paginate(pagenate_opts)
+
+    render(conn, "index.json", dreams: dreams, metadata: metadata)
   end
 
   def create(conn, %{"dream" => dream_params}) do

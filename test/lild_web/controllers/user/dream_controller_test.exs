@@ -16,6 +16,15 @@ defmodule LILDWeb.DreamControllerTest do
 
       assert first["id"] == dream.id
     end
+
+    test "ページネーションする", %{conn: conn, owner: owner} do
+      metadata =
+        get(conn, Routes.user_dream_path(conn, :index, owner))
+        |> json_response(200)
+        |> Map.get("metadata")
+
+      assert %{"before" => _, "after" => _} = metadata
+    end
   end
 
   describe "create" do
