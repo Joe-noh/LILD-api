@@ -6,7 +6,25 @@ defmodule LILDWeb.UserControllerTest do
 
   @firebase_response Fixture.Accounts.firebase_id_token_payload()
 
+  describe "show" do
+    setup [:create_users, :login_as_owner]
+
+    test "レスポンスがAPIドキュメントと乖離していない", %{conn: conn, owner: owner} do
+      get(conn, Routes.user_path(conn, :show, owner))
+      |> json_response(200)
+      |> assert_schema("UserResponse", LILDWeb.ApiSpec.spec())
+    end
+  end
+
   describe "create" do
+    test_with_mock "レスポンスがAPIドキュメントと乖離していない", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
+      params = Fixture.Accounts.user(%{"id_token" => "firebase.id_token"})
+
+      post(conn, Routes.user_path(conn, :create), user: params)
+      |> json_response(201)
+      |> assert_schema("UserResponse", LILDWeb.ApiSpec.spec())
+    end
+
     test_with_mock "ユーザを登録する", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
       params = Fixture.Accounts.user(%{"id_token" => "firebase.id_token"})
 
@@ -32,6 +50,14 @@ defmodule LILDWeb.UserControllerTest do
 
   describe "update" do
     setup [:create_users, :login_as_owner]
+
+    test "レスポンスがAPIドキュメントと乖離していない", %{conn: conn, owner: owner} do
+      params = Fixture.Accounts.user()
+
+      put(conn, Routes.user_path(conn, :update, owner), user: params)
+      |> json_response(200)
+      |> assert_schema("UserResponse", LILDWeb.ApiSpec.spec())
+    end
 
     test "ユーザを更新する", %{conn: conn, owner: owner} do
       params = Fixture.Accounts.user()

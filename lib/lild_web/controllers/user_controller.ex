@@ -9,6 +9,11 @@ defmodule LILDWeb.UserController do
 
   action_fallback LILDWeb.FallbackController
 
+  def show(conn, %{"id" => id}) do
+    user = Accounts.get_user!(id)
+    render(conn, "show.json", user: user)
+  end
+
   def create(conn, %{"user" => user_params}) do
     with {:ok, payload} <- Accounts.verify_id_token(Map.get(user_params, "id_token")),
          firebase_account_params = extract_firebase_account_params(payload),
@@ -20,11 +25,6 @@ defmodule LILDWeb.UserController do
       {:error, _, changeset, _} ->
         {:error, changeset}
     end
-  end
-
-  def show(conn, %{"id" => id}) do
-    user = Accounts.get_user!(id)
-    render(conn, "show.json", user: user)
   end
 
   def update(conn, %{"id" => id, "user" => user_params}) do
@@ -65,5 +65,70 @@ defmodule LILDWeb.UserController do
       |> LILDWeb.FallbackController.call({:error, :unauthorized})
       |> Plug.Conn.halt()
     end
+  end
+
+  alias OpenApiSpex.Operation
+
+  def open_api_operation(action) do
+    apply(__MODULE__, :"#{action}_operation", [])
+  end
+
+  def show_operation() do
+    %Operation{
+      tags: ["users"],
+      summary: "Get a user",
+      description: "Return a single user.",
+      operationId: "users.show",
+      parameters: [
+        Operation.parameter(:id, :path, :string, "User ID", example: "00JN4SVDW0APCBW9E3T44A8MTB")
+      ],
+      responses: %{
+        200 => Operation.response("User", "application/json", LILDWeb.Schemas.UserResponse)
+      }
+    }
+  end
+
+  def create_operation() do
+    %Operation{
+      tags: ["users"],
+      summary: "Signup",
+      description: "Create a user.",
+      operationId: "users.create",
+      requestBody: Operation.request_body("User parameters", "application/json", LILDWeb.Schemas.SignupRequest),
+      responses: %{
+        201 => Operation.response("User", "application/json", LILDWeb.Schemas.SessionResponse)
+      }
+    }
+  end
+
+  def update_operation() do
+    %Operation{
+      tags: ["users"],
+      summary: "Update a user",
+      description: "Update and return specified user.",
+      operationId: "users.update",
+      parameters: [
+        Operation.parameter(:id, :path, :string, "User ID", example: "00JN4SVDW0APCBW9E3T44A8MTB")
+      ],
+      requestBody: Operation.request_body("User parameters", "application/json", LILDWeb.Schemas.UserRequest),
+      responses: %{
+        200 => Operation.response("User", "application/json", LILDWeb.Schemas.UserResponse)
+      }
+    }
+  end
+
+  def delete_operation() do
+    %Operation{
+      tags: ["users"],
+      summary: "Delete a user",
+      description: "Delete a single user and associated resources.",
+      operationId: "users.delete",
+      parameters: [
+        Operation.parameter(:id, :path, :string, "User ID", example: "00JN4SVDW0APCBW9E3T44A8MTB")
+      ],
+      responses: %{
+        204 => %OpenApiSpex.Response{description: "No content"}
+      }
+    }
   end
 end
