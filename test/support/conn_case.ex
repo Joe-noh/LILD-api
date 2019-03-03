@@ -21,6 +21,7 @@ defmodule LILDWeb.ConnCase do
       use Phoenix.ConnTest
       alias LILDWeb.Router.Helpers, as: Routes
       alias LILD.Fixture
+      import OpenApiSpex.Test.Assertions
 
       # The default endpoint for testing
       @endpoint LILDWeb.Endpoint

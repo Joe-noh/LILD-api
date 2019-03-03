@@ -46,6 +46,7 @@ defmodule LILD.MixProject do
       {:joken, "~> 2.0"},
       {:jwt, git: "https://github.com/amezcua/jwt-google-tokens.git", revision: "3d166ae67515ce376680e02f287e7fac7e45e2a4"},
       {:paginator, "~> 0.6"},
+      {:open_api_spex, "~> 3.1"},
       {:ffaker, "~> 0.3", only: :test},
       {:mock, "~> 0.3.0", only: :test}
     ]

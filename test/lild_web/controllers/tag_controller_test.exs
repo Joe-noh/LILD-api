@@ -6,6 +6,12 @@ defmodule LILDWeb.TagControllerTest do
   setup [:create_tag]
 
   describe "index" do
+    test "APIドキュメントと乖離していない", %{conn: conn} do
+      get(conn, Routes.tag_path(conn, :index))
+      |> json_response(200)
+      |> assert_schema("TagsResponse", LILDWeb.ApiSpec.spec())
+    end
+
     test "タグを全部返す", %{conn: conn, tags: tags} do
       ids =
         get(conn, Routes.tag_path(conn, :index))
