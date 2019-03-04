@@ -36,14 +36,14 @@ defmodule LILDWeb.UserControllerTest do
     test "ユーザを更新する", %{conn: conn, owner: owner} do
       params = Fixture.Accounts.user()
 
-      data =
+      json =
         put(conn, Routes.user_path(conn, :update, owner), user: params)
         |> json_response(200)
-        |> Map.get("data")
+        |> Map.get("user")
 
-      assert data["id"] |> is_binary
-      assert data["name"] == params["name"]
-      assert data["avatar_url"] == params["avatar_url"]
+      assert json["id"] |> is_binary
+      assert json["name"] == params["name"]
+      assert json["avatar_url"] == params["avatar_url"]
     end
 
     test "パラメータがよくないときは422", %{conn: conn, owner: owner} do
