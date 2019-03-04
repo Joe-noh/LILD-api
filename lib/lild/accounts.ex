@@ -9,6 +9,8 @@ defmodule LILD.Accounts do
   alias LILD.Repo
   alias LILD.Accounts.{User, SocialAccount}
 
+  defdelegate preload(struct, assoc), to: Repo
+
   def get_user!(id) do
     Repo.get!(User, id)
   end
