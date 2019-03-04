@@ -18,6 +18,7 @@ defmodule LILD.Accounts.SocialAccount do
     social_account
     |> cast(attrs, [:uid, :provider])
     |> validate_required([:uid, :provider])
+    |> validate_inclusion(:provider, ["twitter.com", "google.com"])
     |> unique_constraint(:uid, name: :social_accounts_provider_uid_index)
   end
 end
