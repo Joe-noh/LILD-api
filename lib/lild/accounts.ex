@@ -7,7 +7,9 @@ defmodule LILD.Accounts do
 
   alias Ecto.Multi
   alias LILD.Repo
-  alias LILD.Accounts.{User, FirebaseAccount}
+  alias LILD.Accounts.{User, SocialAccount}
+
+  defdelegate preload(struct, assoc), to: Repo
 
   def get_user!(id) do
     Repo.get!(User, id)
@@ -17,13 +19,13 @@ defmodule LILD.Accounts do
     Repo.get(User, id)
   end
 
-  def create_user(user_attrs, firebase_account_attrs) do
+  def create_user(user_attrs, social_account_attrs) do
     Multi.new()
     |> Multi.insert(:user, User.changeset(%User{}, user_attrs))
-    |> Multi.run(:firebase_account, fn repo, %{user: user} ->
+    |> Multi.run(:social_account, fn repo, %{user: user} ->
       user
-      |> Ecto.build_assoc(:firebase_account)
-      |> FirebaseAccount.changeset(firebase_account_attrs)
+      |> User.build_social_account(social_account_attrs)
+      |> SocialAccount.changeset(social_account_attrs)
       |> repo.insert
     end)
     |> Repo.transaction()
@@ -36,12 +38,7 @@ defmodule LILD.Accounts do
   end
 
   def delete_user(%User{} = user) do
-    user = Repo.preload(user, :firebase_account)
-
-    Multi.new()
-    |> Multi.delete(:firebase_account, user.firebase_account)
-    |> Multi.delete(:user, user)
-    |> Repo.transaction()
+    Repo.delete(user)
   end
 
   def verify_id_token(id_token) do

@@ -109,8 +109,8 @@ defmodule LILDWeb.UserControllerTest do
   end
 
   defp create_users(_) do
-    {:ok, %{user: owner}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.firebase_account())
-    {:ok, %{user: another}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.firebase_account())
+    {:ok, %{user: owner}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.social_account())
+    {:ok, %{user: another}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.social_account())
 
     {:ok, _} = Dreams.create_dream(owner, Fixture.Dreams.dream())
 
