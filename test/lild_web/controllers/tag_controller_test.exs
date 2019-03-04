@@ -10,7 +10,7 @@ defmodule LILDWeb.TagControllerTest do
       ids =
         get(conn, Routes.tag_path(conn, :index))
         |> json_response(200)
-        |> Map.get("data")
+        |> Map.get("tags")
         |> Enum.map(&Map.get(&1, "id"))
 
       Enum.each(tags, fn tag -> assert tag.id in ids end)
