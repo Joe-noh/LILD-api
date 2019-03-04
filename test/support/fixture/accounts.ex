@@ -38,6 +38,6 @@ defmodule LILD.Fixture.Accounts do
   end
 
   defp random_uid do
-    Enum.random(1..999999999999999999) |> Integer.to_string()
+    Enum.random(1..999_999_999_999_999_999) |> Integer.to_string()
   end
 end
