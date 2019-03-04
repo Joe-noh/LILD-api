@@ -6,10 +6,9 @@ defmodule LILD.Fixture.Accounts do
     })
   end
 
-  def firebase_account(attrs \\ %{}) do
+  def social_account(attrs \\ %{}) do
     LILD.Fixture.merge(attrs, %{
-      "firebase_uid" => "tR7hx0eEqeZYYFM9mODVmM29TUP2",
-      "provider_uid" => "872977718727458816",
+      "uid" => random_uid(),
       "provider" => Enum.random(["twitter.com", "google.com"])
     })
   end
@@ -26,7 +25,7 @@ defmodule LILD.Fixture.Accounts do
       "auth_time" => 1_550_966_987,
       "exp" => 1_550_970_587,
       "firebase" => %{
-        "identities" => %{"twitter.com" => ["872977718727458816"]},
+        "identities" => %{"twitter.com" => [random_uid()]},
         "sign_in_provider" => "twitter.com"
       },
       "iat" => 1_550_966_987,
@@ -36,5 +35,9 @@ defmodule LILD.Fixture.Accounts do
       "sub" => "tR7hx0eEqeZYYOM9mODVmM39TUP2",
       "user_id" => "tR7hx0eEqeZYYOM9mODVmM39TUP2"
     }
+  end
+
+  defp random_uid do
+    Enum.random(1..999999999999999999) |> Integer.to_string()
   end
 end

@@ -35,7 +35,7 @@ defmodule LILDWeb.CurrentUserPlugTest do
   end
 
   defp create_user(_) do
-    {:ok, %{user: user}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.firebase_account())
+    {:ok, %{user: user}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.social_account())
     {:ok, access_token, _payload} = AccessToken.encode(user)
 
     %{user: user, access_token: access_token}

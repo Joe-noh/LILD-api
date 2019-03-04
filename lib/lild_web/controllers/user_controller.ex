@@ -11,8 +11,8 @@ defmodule LILDWeb.UserController do
 
   def create(conn, %{"user" => user_params, "firebase" => %{"id_token" => id_token}}) do
     with {:ok, payload} <- Accounts.verify_id_token(id_token),
-         firebase_account_params = extract_firebase_account_params(payload),
-         {:ok, %{user: %User{} = user}} <- Accounts.create_user(user_params, firebase_account_params),
+         social_account_params = extract_social_account_params(payload),
+         {:ok, %{user: %User{} = user}} <- Accounts.create_user(user_params, social_account_params),
          {:ok, token, _payload} <- LILDWeb.AccessToken.encode(user) do
       conn
       |> put_status(:created)
@@ -45,18 +45,11 @@ defmodule LILDWeb.UserController do
     end
   end
 
-  defp extract_firebase_account_params(payload) do
-    %{
-      "firebase" => %{
-        "sign_in_provider" => provider,
-        "identities" => identities
-      },
-      "user_id" => firebase_uid
-    } = payload
+  defp extract_social_account_params(%{"firebase" => payload}) do
+    %{"sign_in_provider" => provider, "identities" => identities} = payload
+    [uid] = Map.get(identities, provider)
 
-    provider_uid = Map.get(identities, provider) |> List.first()
-
-    %{firebase_uid: firebase_uid, provider_uid: provider_uid, provider: provider}
+    %{"uid" => uid, "provider" => provider}
   end
 
   defp check_access_restrictions(conn, _) do

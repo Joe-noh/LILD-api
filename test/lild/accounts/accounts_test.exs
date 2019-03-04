@@ -16,14 +16,13 @@ defmodule LILD.AccountsTest do
 
     test "create_user/1 with valid data creates a user" do
       user_attrs = Fixture.Accounts.user()
-      firebase_account_attrs = Fixture.Accounts.firebase_account()
-      {:ok, %{user: user, firebase_account: firebase_account}} = Accounts.create_user(user_attrs, firebase_account_attrs)
+      social_account_attrs = Fixture.Accounts.social_account()
+      {:ok, %{user: user, social_account: social_account}} = Accounts.create_user(user_attrs, social_account_attrs)
 
       assert user.name == user_attrs["name"]
       assert user.avatar_url == user_attrs["avatar_url"]
-      assert firebase_account.firebase_uid == firebase_account_attrs["firebase_uid"]
-      assert firebase_account.provider_uid == firebase_account_attrs["provider_uid"]
-      assert firebase_account.provider == firebase_account_attrs["provider"]
+      assert social_account.uid == social_account_attrs["uid"]
+      assert social_account.provider == social_account_attrs["provider"]
     end
 
     test "create_user/1 with invalid data returns error changeset" do
@@ -52,7 +51,7 @@ defmodule LILD.AccountsTest do
     setup [:create_user]
 
     test "delete_user/1 deletes the user", %{user: user} do
-      assert {:ok, %{user: _, firebase_account: _}} = Accounts.delete_user(user)
+      assert {:ok, _user} = Accounts.delete_user(user)
 
       assert_raise Ecto.NoResultsError, fn ->
         Accounts.get_user!(user.id)
@@ -61,6 +60,6 @@ defmodule LILD.AccountsTest do
   end
 
   defp create_user(_) do
-    Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.firebase_account())
+    Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.social_account())
   end
 end

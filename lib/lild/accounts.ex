@@ -7,7 +7,7 @@ defmodule LILD.Accounts do
 
   alias Ecto.Multi
   alias LILD.Repo
-  alias LILD.Accounts.{User, FirebaseAccount}
+  alias LILD.Accounts.{User, SocialAccount}
 
   def get_user!(id) do
     Repo.get!(User, id)

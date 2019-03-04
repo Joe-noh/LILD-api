@@ -112,7 +112,7 @@ defmodule LILD.DreamsTest do
   end
 
   defp create_user(_) do
-    Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.firebase_account())
+    Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.social_account())
   end
 
   defp create_dream(%{user: user}) do

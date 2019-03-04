@@ -1,3 +1,3 @@
-defmodule LILDWeb.FirebaseAccountView do
+defmodule LILDWeb.SocialAccountView do
   use LILDWeb, :view
 end
