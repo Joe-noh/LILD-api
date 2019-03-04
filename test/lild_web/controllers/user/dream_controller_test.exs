@@ -12,7 +12,7 @@ defmodule LILDWeb.DreamControllerTest do
       [first | _] =
         get(conn, Routes.user_dream_path(conn, :index, owner))
         |> json_response(200)
-        |> Map.get("data")
+        |> Map.get("dreams")
 
       assert first["id"] == dream.id
     end
@@ -31,16 +31,16 @@ defmodule LILDWeb.DreamControllerTest do
     test "夢とタグをつくる", %{conn: conn, owner: owner} do
       params = Fixture.Dreams.dream(%{"tags" => ["ハッピー"]})
 
-      data =
+      json =
         post(conn, Routes.user_dream_path(conn, :create, owner), dream: params)
         |> json_response(201)
-        |> Map.get("data")
+        |> Map.get("dream")
 
-      assert data["id"] |> is_binary
-      assert data["body"] == params["body"]
-      assert data["date"] == params["date"] |> to_string()
-      assert data["secret"] == params["secret"]
-      assert data["draft"] == params["draft"]
+      assert json["id"] |> is_binary
+      assert json["body"] == params["body"]
+      assert json["date"] == params["date"] |> to_string()
+      assert json["secret"] == params["secret"]
+      assert json["draft"] == params["draft"]
     end
 
     test "パラメータがよくないときは422", %{conn: conn, owner: owner} do
@@ -61,16 +61,16 @@ defmodule LILDWeb.DreamControllerTest do
     test "夢とタグを更新する", %{conn: conn, owner: owner, dream: dream} do
       params = Fixture.Dreams.dream(%{"tags" => ["ハッピー"]})
 
-      data =
+      json =
         put(conn, Routes.user_dream_path(conn, :update, owner, dream), dream: params)
         |> json_response(200)
-        |> Map.get("data")
+        |> Map.get("dream")
 
-      assert data["id"] |> is_binary
-      assert data["body"] == params["body"]
-      assert data["date"] == params["date"] |> to_string()
-      assert data["secret"] == params["secret"]
-      assert data["draft"] == params["draft"]
+      assert json["id"] |> is_binary
+      assert json["body"] == params["body"]
+      assert json["date"] == params["date"] |> to_string()
+      assert json["secret"] == params["secret"]
+      assert json["draft"] == params["draft"]
     end
 
     test "パラメータがよくないときは422", %{conn: conn, owner: owner, dream: dream} do
