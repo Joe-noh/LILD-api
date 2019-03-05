@@ -39,10 +39,8 @@ defmodule LILD.DreamsTest do
   describe "published_dreams" do
     setup [:create_user, :create_dreams]
 
-    test "下書きでも非公開でもない夢を返すクエリを返す", %{user: user} do
-      user
-      |> Ecto.assoc(:dreams)
-      |> Dreams.published_dreams()
+    test "下書きでも非公開でもない夢を返すクエリを返す" do
+      Dreams.published_dreams(Dream)
       |> Repo.all()
       |> Enum.each(fn dream ->
         refute dream.draft
