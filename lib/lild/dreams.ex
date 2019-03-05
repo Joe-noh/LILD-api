@@ -30,6 +30,10 @@ defmodule LILD.Dreams do
     queryable |> where(draft: false)
   end
 
+  def only_draft_dreams(queryable) do
+    queryable |> where(draft: :true)
+  end
+
   def get_dream!(user = %User{}, id) do
     user
     |> Ecto.assoc(:dreams)
