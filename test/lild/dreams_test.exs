@@ -41,6 +41,27 @@ defmodule LILD.DreamsTest do
     end
   end
 
+  describe "without_reported_dreams()" do
+    setup [:create_user, :create_dreams, :report_dream]
+
+    test "自分が通報した夢以外を返すクエリを返す", %{user: user, tags: [tag | _], reported_dreams: [reported_dream | _]} do
+      Dream
+      |> Dreams.without_reported_dreams(user)
+      |> Repo.all()
+      |> Enum.each(fn dream ->
+        assert dream.id != reported_dream.id
+      end)
+
+      tag
+      |> Dreams.dreams_query()
+      |> Dreams.without_reported_dreams(user)
+      |> Repo.all()
+      |> Enum.each(fn dream ->
+        assert dream.id != reported_dream.id
+      end)
+    end
+  end
+
   describe "get_dream!" do
     setup [:create_user, :create_dreams]
 
@@ -177,5 +198,12 @@ defmodule LILD.DreamsTest do
     {:ok, %{dream: dream3}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"draft" => false, "secret" => false}))
 
     %{dreams: [dream1, dream2, dream3], tags: tags}
+  end
+
+  defp report_dream(%{user: user, another: another, dreams: [user_dream, another_dream | _]}) do
+    {:ok, reported_another_dream} = Dreams.report_dream(user, another_dream)
+    {:ok, reported_user_dream} = Dreams.report_dream(another, user_dream)
+
+    %{reported_dreams: [reported_another_dream, reported_user_dream]}
   end
 end

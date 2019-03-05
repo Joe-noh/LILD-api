@@ -34,6 +34,13 @@ defmodule LILD.Dreams do
     queryable |> where(draft: :true)
   end
 
+  def without_reported_dreams(queryable, reporter) do
+    queryable
+    |> join(:left, [d], r in assoc(d, :reports), as: :report)
+    |> join(:left, [report: r], u in User, on: u.id == r.user_id and u.id == ^reporter.id, as: :user)
+    |> where([user: u], is_nil(u.id))
+  end
+
   def get_dream!(id) do
     Dream |> Repo.get!(id)
   end
