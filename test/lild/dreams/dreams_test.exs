@@ -7,14 +7,6 @@ defmodule LILD.DreamsTest do
   describe "dreams_query" do
     setup [:create_user, :create_dreams]
 
-    test "夢をすべて返すクエリを返す", %{dreams: dreams} do
-      Dreams.dreams_query()
-      |> Repo.all()
-      |> Enum.each(fn dream ->
-        assert dream.id in Enum.map(dreams, & &1.id)
-      end)
-    end
-
     test "ユーザの夢をすべて返すクエリを返す", %{user: user} do
       user_dreams = user |> Ecto.assoc(:dreams) |> Repo.all()
 

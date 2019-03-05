@@ -10,10 +10,6 @@ defmodule LILD.Dreams do
   alias LILD.Dreams.{Dream, Tag}
   alias LILD.Accounts.User
 
-  def dreams_query do
-    Dream |> dreams_query()
-  end
-
   def dreams_query(user = %User{}) do
     user |> Ecto.assoc(:dreams)
   end
