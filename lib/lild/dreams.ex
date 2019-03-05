@@ -32,8 +32,11 @@ defmodule LILD.Dreams do
   end
 
   def published_dreams(queryable) do
-    queryable
-    |> where(draft: false, secret: false)
+    queryable |> where(draft: false, secret: false)
+  end
+
+  def without_draft_dreams(queryable) do
+    queryable |> where(draft: false)
   end
 
   def get_dream!(user = %User{}, id) do
