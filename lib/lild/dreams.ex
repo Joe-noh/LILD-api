@@ -7,7 +7,7 @@ defmodule LILD.Dreams do
 
   alias Ecto.Multi
   alias LILD.Repo
-  alias LILD.Dreams.{Dream, Tag}
+  alias LILD.Dreams.{Dream, Tag, Report}
   alias LILD.Accounts.User
 
   def dreams_query(user = %User{}) do
@@ -32,6 +32,10 @@ defmodule LILD.Dreams do
 
   def only_draft_dreams(queryable) do
     queryable |> where(draft: :true)
+  end
+
+  def get_dream!(id) do
+    Dream |> Repo.get!(id)
   end
 
   def get_dream!(user = %User{}, id) do
@@ -101,5 +105,11 @@ defmodule LILD.Dreams do
     tags = Tag |> where([t], t.name in ^names) |> repo.all()
 
     {:ok, tags}
+  end
+
+  def report_dream(user = %User{}, dream = %Dream{}) do
+    %Report{user_id: user.id, dream_id: dream.id}
+    |> Report.changeset(%{})
+    |> Repo.insert(on_conflict: :nothing)
   end
 end

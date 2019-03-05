@@ -2,7 +2,7 @@ defmodule LILD.DreamsTest do
   use LILD.DataCase, async: true
 
   alias LILD.{Dreams, Accounts}
-  alias LILD.Dreams.{Dream, Tag}
+  alias LILD.Dreams.{Dream, Tag, Report}
 
   describe "dreams_query" do
     setup [:create_user, :create_dreams]
@@ -135,6 +135,31 @@ defmodule LILD.DreamsTest do
       Enum.each(tags, fn tag ->
         assert Tag |> where(name: ^tag.name) |> Repo.one()
       end)
+    end
+  end
+
+  describe "report_dream" do
+    setup [:create_user, :create_dreams]
+
+    test "他人の夢を通報できる", %{user: user, dreams: [_, dream | _]} do
+      {:ok, report} = Dreams.report_dream(user, dream)
+
+      assert report.user_id == user.id
+      assert report.dream_id == dream.id
+    end
+
+    test "何度通報してもReportは1つしかつくらない", %{user: user, dreams: [_, dream | _]} do
+      count = Repo.aggregate(Report, :count, :id)
+
+      {:ok, _} = Dreams.report_dream(user, dream)
+      {:ok, _} = Dreams.report_dream(user, dream)
+      {:ok, _} = Dreams.report_dream(user, dream)
+
+      assert Repo.aggregate(Report, :count, :id) == count + 1
+    end
+
+    test "自分の夢は通報できない", %{user: user, dreams: [dream | _]} do
+      assert {:error, changeset} = Dreams.report_dream(user, dream)
     end
   end
 
