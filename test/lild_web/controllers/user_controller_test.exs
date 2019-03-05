@@ -7,7 +7,7 @@ defmodule LILDWeb.UserControllerTest do
   @firebase_response Fixture.Accounts.firebase_id_token_payload()
 
   describe "create" do
-    test_with_mock "ユーザを登録する", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
+    test_with_mock "ユーザを登録する", %{conn: conn}, Jwt, [:passthrough], verify: fn _ -> {:ok, @firebase_response} end do
       user_params = Fixture.Accounts.user()
 
       json =
@@ -20,7 +20,7 @@ defmodule LILDWeb.UserControllerTest do
       assert json["auth"]["token"] |> is_binary
     end
 
-    test_with_mock "パラメータがよくないときは422", %{conn: conn}, Accounts, [:passthrough], verify_id_token: fn _ -> {:ok, @firebase_response} end do
+    test_with_mock "パラメータがよくないときは422", %{conn: conn}, Jwt, [:passthrough], verify: fn _ -> {:ok, @firebase_response} end do
       errors =
         post(conn, Routes.user_path(conn, :create), user: %{}, firebase: Fixture.Accounts.firebase())
         |> json_response(422)

@@ -10,8 +10,7 @@ defmodule LILDWeb.UserController do
   action_fallback LILDWeb.FallbackController
 
   def create(conn, %{"user" => user_params, "firebase" => %{"id_token" => id_token}}) do
-    with {:ok, payload} <- Accounts.verify_id_token(id_token),
-         social_account_params = extract_social_account_params(payload),
+    with {:ok, social_account_params} <- Accounts.verify_id_token(id_token),
          {:ok, %{user: %User{} = user}} <- Accounts.create_user(user_params, social_account_params),
          {:ok, token, _payload} <- LILDWeb.AccessToken.encode(user) do
       conn
@@ -43,13 +42,6 @@ defmodule LILDWeb.UserController do
     with {:ok, _} <- Accounts.delete_user(user) do
       send_resp(conn, :no_content, "")
     end
-  end
-
-  defp extract_social_account_params(%{"firebase" => payload}) do
-    %{"sign_in_provider" => provider, "identities" => identities} = payload
-    [uid] = Map.get(identities, provider)
-
-    %{"uid" => uid, "provider" => provider}
   end
 
   defp check_access_restrictions(conn, _) do

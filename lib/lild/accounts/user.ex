@@ -12,6 +12,7 @@ defmodule LILD.Accounts.User do
 
     has_one :twitter_account, Accounts.SocialAccount, where: [provider: "twitter.com"]
     has_one :google_account, Accounts.SocialAccount, where: [provider: "google.com"]
+    has_many :social_accounts, Accounts.SocialAccount
     has_many :dreams, LILD.Dreams.Dream
 
     timestamps()
