@@ -13,7 +13,7 @@ defmodule LILDWeb.SessionController do
       |> put_status(:created)
       |> render("show.json", user: user, token: token)
     else
-      nil -> {:error, :unauthorized}
+      _ -> {:error, :unauthorized}
     end
   end
 end
