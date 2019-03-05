@@ -9,12 +9,14 @@ defmodule LILDWeb.Tag.DreamController do
   action_fallback LILDWeb.FallbackController
 
   def index(conn, params) do
-    pagenate_opts = [cursor_fields: [:date, :inserted_at], before: params["before"], after: params["after"]]
+    order = [desc: :date, desc: :inserted_at]
+    pagenate_opts = [cursor_fields: Keyword.values(order), before: params["before"], after: params["after"]]
 
     %{entries: dreams, metadata: metadata} =
       conn.assigns.tag
       |> Dreams.dreams_query()
       |> Dreams.published_dreams()
+      |> Dreams.ordered(order)
       |> LILD.Repo.paginate(pagenate_opts)
 
     conn

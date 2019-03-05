@@ -15,20 +15,15 @@ defmodule LILD.Dreams do
   end
 
   def dreams_query(user = %User{}) do
-    user
-    |> Ecto.assoc(:dreams)
-    |> dreams_query()
+    user |> Ecto.assoc(:dreams)
   end
 
   def dreams_query(tag = %Tag{}) do
-    tag
-    |> Ecto.assoc(:dreams)
-    |> dreams_query()
+    tag |> Ecto.assoc(:dreams)
   end
 
-  def dreams_query(queryable) do
-    queryable
-    |> order_by([d], desc: [d.date, d.inserted_at])
+  def ordered(queryable, order) do
+    queryable |> order_by(^order)
   end
 
   def published_dreams(queryable) do
