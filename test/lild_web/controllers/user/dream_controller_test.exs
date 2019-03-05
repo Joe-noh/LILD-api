@@ -1,4 +1,4 @@
-defmodule LILDWeb.DreamControllerTest do
+defmodule LILDWeb.User.DreamControllerTest do
   use LILDWeb.ConnCase, async: true
 
   alias LILD.{Dreams, Accounts}
