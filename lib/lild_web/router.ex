@@ -20,7 +20,9 @@ defmodule LILDWeb.Router do
     end
 
     resources "/users", UserController, only: [:show, :create, :update, :delete], alias: User do
-      resources "/dreams", DreamController, only: [:index, :show, :create, :update, :delete]
+      resources "/dreams", DreamController, only: [:index, :show, :create, :update, :delete], alias: Dream do
+        resources "/reports", ReportController, only: [:create]
+      end
     end
 
     resources "/tags", TagController, only: [:index], alias: Tag do
