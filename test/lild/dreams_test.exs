@@ -4,9 +4,9 @@ defmodule LILD.DreamsTest do
   alias LILD.{Dreams, Accounts}
   alias LILD.Dreams.{Dream, Tag, Report}
 
-  describe "dreams_query" do
-    setup [:create_user, :create_dreams]
+  setup [:create_user, :create_dreams]
 
+  describe "dreams_query" do
     test "ユーザの夢をすべて返すクエリを返す", %{user: user} do
       user_dreams = user |> Ecto.assoc(:dreams) |> Repo.all()
 
@@ -29,8 +29,6 @@ defmodule LILD.DreamsTest do
   end
 
   describe "published_dreams" do
-    setup [:create_user, :create_dreams]
-
     test "下書きでも非公開でもない夢を返すクエリを返す" do
       Dreams.published_dreams(Dream)
       |> Repo.all()
@@ -42,7 +40,7 @@ defmodule LILD.DreamsTest do
   end
 
   describe "without_reported_dreams()" do
-    setup [:create_user, :create_dreams, :report_dream]
+    setup [:report_dream]
 
     test "自分が通報した夢以外を返すクエリを返す", %{user: user, tags: [tag | _], reported_dreams: [reported_dream | _]} do
       Dream
@@ -63,16 +61,12 @@ defmodule LILD.DreamsTest do
   end
 
   describe "get_dream!" do
-    setup [:create_user, :create_dreams]
-
     test "IDをもとに夢を返す", %{user: user, dreams: [dream | _]} do
       assert Dreams.get_dream!(user, dream.id) |> Map.get(:id) == dream.id
     end
   end
 
   describe "create_dream" do
-    setup [:create_user, :create_dreams]
-
     test "夢をつくる", %{user: user, tags: tags} do
       tag_names = Enum.map(tags, & &1.name) |> Enum.sort()
       dream_attrs = Fixture.Dreams.dream(%{"tags" => tag_names})
@@ -99,8 +93,6 @@ defmodule LILD.DreamsTest do
   end
 
   describe "update_dream" do
-    setup [:create_user, :create_dreams]
-
     test "夢を更新する", %{dreams: [dream | _]} do
       dream_attrs = Fixture.Dreams.dream(%{"tags" => ["ハッピー"]})
       {:ok, %{dream: dream}} = Dreams.update_dream(dream, dream_attrs)
@@ -140,8 +132,6 @@ defmodule LILD.DreamsTest do
   end
 
   describe "delete_dream" do
-    setup [:create_user, :create_dreams]
-
     test "夢を消す", %{user: user, dreams: [dream | _]} do
       assert {:ok, %Dream{}} = Dreams.delete_dream(dream)
 
@@ -160,8 +150,6 @@ defmodule LILD.DreamsTest do
   end
 
   describe "report_dream" do
-    setup [:create_user, :create_dreams]
-
     test "他人の夢を通報できる", %{user: user, dreams: [_, dream | _]} do
       {:ok, report} = Dreams.report_dream(user, dream)
 
