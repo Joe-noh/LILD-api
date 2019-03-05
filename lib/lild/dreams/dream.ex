@@ -2,6 +2,8 @@ defmodule LILD.Dreams.Dream do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias LILD.Dreams.Report
+
   @primary_key {:id, Ecto.ULID, autogenerate: true}
   @foreign_key_type Ecto.ULID
   schema "dreams" do
@@ -11,6 +13,7 @@ defmodule LILD.Dreams.Dream do
     field :secret, :boolean, default: false
 
     belongs_to :user, LILD.Accounts.User
+    has_many :reports, Report
     many_to_many :tags, LILD.Dreams.Tag, join_through: "dreams_tags", on_replace: :delete
 
     timestamps()
