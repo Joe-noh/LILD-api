@@ -127,7 +127,7 @@ defmodule LILDWeb.User.DreamControllerTest do
 
   defp create_dream(%{owner: owner}) do
     {:ok, tags = [tag | _]} = Dreams.create_tags(["nightmare", "予知夢好きと繋がりたい"])
-    {:ok, %{dream: dream}} = Dreams.create_dream(owner, Fixture.Dreams.dream(%{"tags" => [tag.name]}))
+    {:ok, %{dream: dream}} = Dreams.create_dream(owner, Fixture.Dreams.dream(%{"draft" => false, "secret" => false, "tags" => [tag.name]}))
 
     %{dream: dream, tags: tags}
   end

@@ -31,6 +31,11 @@ defmodule LILD.Dreams do
     |> order_by([d], desc: [d.date, d.inserted_at])
   end
 
+  def published_dreams(queryable) do
+    queryable
+    |> where(draft: false, secret: false)
+  end
+
   def get_dream!(user = %User{}, id) do
     user
     |> Ecto.assoc(:dreams)

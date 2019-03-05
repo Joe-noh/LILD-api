@@ -14,6 +14,7 @@ defmodule LILDWeb.Tag.DreamController do
     %{entries: dreams, metadata: metadata} =
       conn.assigns.tag
       |> Dreams.dreams_query()
+      |> Dreams.published_dreams()
       |> LILD.Repo.paginate(pagenate_opts)
 
     render(conn, "index.json", dreams: dreams, metadata: metadata)

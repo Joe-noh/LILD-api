@@ -36,6 +36,21 @@ defmodule LILD.DreamsTest do
     end
   end
 
+  describe "published_dreams" do
+    setup [:create_user, :create_dreams]
+
+    test "下書きでも非公開でもない夢を返すクエリを返す", %{user: user} do
+      user
+      |> Ecto.assoc(:dreams)
+      |> Dreams.published_dreams()
+      |> Repo.all()
+      |> Enum.each(fn dream ->
+        refute dream.draft
+        refute dream.secret
+      end)
+    end
+  end
+
   describe "get_dream!" do
     setup [:create_user, :create_dreams]
 
@@ -144,7 +159,7 @@ defmodule LILD.DreamsTest do
     {:ok, tags = [tag | _]} = Dreams.create_tags(["nightmare", "予知夢好きと繋がりたい"])
     {:ok, %{dream: dream1}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"tags" => [tag.name]}))
     {:ok, %{dream: dream2}} = Dreams.create_dream(another, Fixture.Dreams.dream(%{"tags" => [tag.name]}))
-    {:ok, %{dream: dream3}} = Dreams.create_dream(user, Fixture.Dreams.dream())
+    {:ok, %{dream: dream3}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"draft" => false, "secret" => false}))
 
     %{dreams: [dream1, dream2, dream3], tags: tags}
   end
