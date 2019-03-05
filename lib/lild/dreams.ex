@@ -31,7 +31,7 @@ defmodule LILD.Dreams do
   end
 
   def only_draft_dreams(queryable) do
-    queryable |> where(draft: :true)
+    queryable |> where(draft: true)
   end
 
   def without_reported_dreams(queryable, reporter) do

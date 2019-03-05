@@ -30,6 +30,7 @@ defmodule LILD.Dreams.Report do
     case Dreams.get_dream!(dream_id) do
       %{user_id: ^user_id} ->
         add_error(changeset, :dream_id, "Cannot report own dream.")
+
       _ ->
         changeset
     end
