@@ -7,14 +7,6 @@ defmodule LILD.DreamsTest do
   describe "dreams_query" do
     setup [:create_user, :create_dreams]
 
-    test "夢をすべて返すクエリを返す", %{dreams: dreams} do
-      Dreams.dreams_query()
-      |> Repo.all()
-      |> Enum.each(fn dream ->
-        assert dream.id in Enum.map(dreams, & &1.id)
-      end)
-    end
-
     test "ユーザの夢をすべて返すクエリを返す", %{user: user} do
       user_dreams = user |> Ecto.assoc(:dreams) |> Repo.all()
 
@@ -32,6 +24,19 @@ defmodule LILD.DreamsTest do
       |> Repo.all()
       |> Enum.each(fn dream ->
         assert dream.id in Enum.map(tagged_dreams, & &1.id)
+      end)
+    end
+  end
+
+  describe "published_dreams" do
+    setup [:create_user, :create_dreams]
+
+    test "下書きでも非公開でもない夢を返すクエリを返す" do
+      Dreams.published_dreams(Dream)
+      |> Repo.all()
+      |> Enum.each(fn dream ->
+        refute dream.draft
+        refute dream.secret
       end)
     end
   end
@@ -144,7 +149,7 @@ defmodule LILD.DreamsTest do
     {:ok, tags = [tag | _]} = Dreams.create_tags(["nightmare", "予知夢好きと繋がりたい"])
     {:ok, %{dream: dream1}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"tags" => [tag.name]}))
     {:ok, %{dream: dream2}} = Dreams.create_dream(another, Fixture.Dreams.dream(%{"tags" => [tag.name]}))
-    {:ok, %{dream: dream3}} = Dreams.create_dream(user, Fixture.Dreams.dream())
+    {:ok, %{dream: dream3}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"draft" => false, "secret" => false}))
 
     %{dreams: [dream1, dream2, dream3], tags: tags}
   end

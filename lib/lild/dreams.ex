@@ -10,25 +10,28 @@ defmodule LILD.Dreams do
   alias LILD.Dreams.{Dream, Tag}
   alias LILD.Accounts.User
 
-  def dreams_query do
-    Dream |> dreams_query()
-  end
-
   def dreams_query(user = %User{}) do
-    user
-    |> Ecto.assoc(:dreams)
-    |> dreams_query()
+    user |> Ecto.assoc(:dreams)
   end
 
   def dreams_query(tag = %Tag{}) do
-    tag
-    |> Ecto.assoc(:dreams)
-    |> dreams_query()
+    tag |> Ecto.assoc(:dreams)
   end
 
-  def dreams_query(queryable) do
-    queryable
-    |> order_by([d], desc: [d.date, d.inserted_at])
+  def ordered(queryable, order) do
+    queryable |> order_by(^order)
+  end
+
+  def published_dreams(queryable) do
+    queryable |> where(draft: false, secret: false)
+  end
+
+  def without_draft_dreams(queryable) do
+    queryable |> where(draft: false)
+  end
+
+  def only_draft_dreams(queryable) do
+    queryable |> where(draft: :true)
   end
 
   def get_dream!(user = %User{}, id) do
