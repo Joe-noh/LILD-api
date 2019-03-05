@@ -13,6 +13,13 @@ defmodule LILDWeb.FallbackController do
     |> render("error.json", changeset: changeset)
   end
 
+  def call(conn, {:error, :bad_request}) do
+    conn
+    |> put_status(:bad_request)
+    |> put_view(LILDWeb.ErrorView)
+    |> render("400.json")
+  end
+
   def call(conn, {:error, :unauthorized}) do
     conn
     |> put_status(:unauthorized)
