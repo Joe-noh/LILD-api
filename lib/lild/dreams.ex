@@ -20,6 +20,12 @@ defmodule LILD.Dreams do
     |> dreams_query()
   end
 
+  def dreams_query(tag = %Tag{}) do
+    tag
+    |> Ecto.assoc(:dreams)
+    |> dreams_query()
+  end
+
   def dreams_query(queryable) do
     queryable
     |> order_by([d], desc: [d.date, d.inserted_at])
@@ -73,6 +79,10 @@ defmodule LILD.Dreams do
 
   def list_tags do
     Repo.all(Tag)
+  end
+
+  def get_tag!(id) do
+    Repo.get!(Tag, id)
   end
 
   def create_tags(names, repo \\ Repo) do
