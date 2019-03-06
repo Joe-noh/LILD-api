@@ -2,11 +2,11 @@ defmodule LILD.DreamsTest do
   use LILD.DataCase, async: true
 
   alias LILD.{Dreams, Accounts}
-  alias LILD.Dreams.{Dream, Tag}
+  alias LILD.Dreams.{Dream, Tag, Report}
+
+  setup [:create_user, :create_dreams]
 
   describe "dreams_query" do
-    setup [:create_user, :create_dreams]
-
     test "ユーザの夢をすべて返すクエリを返す", %{user: user} do
       user_dreams = user |> Ecto.assoc(:dreams) |> Repo.all()
 
@@ -29,8 +29,6 @@ defmodule LILD.DreamsTest do
   end
 
   describe "published_dreams" do
-    setup [:create_user, :create_dreams]
-
     test "下書きでも非公開でもない夢を返すクエリを返す" do
       Dreams.published_dreams(Dream)
       |> Repo.all()
@@ -41,17 +39,34 @@ defmodule LILD.DreamsTest do
     end
   end
 
-  describe "get_dream!" do
-    setup [:create_user, :create_dreams]
+  describe "without_reported_dreams()" do
+    setup [:report_dream]
 
+    test "自分が通報した夢以外を返すクエリを返す", %{user: user, tags: [tag | _], reported_dreams: [reported_dream | _]} do
+      Dream
+      |> Dreams.without_reported_dreams(user)
+      |> Repo.all()
+      |> Enum.each(fn dream ->
+        assert dream.id != reported_dream.id
+      end)
+
+      tag
+      |> Dreams.dreams_query()
+      |> Dreams.without_reported_dreams(user)
+      |> Repo.all()
+      |> Enum.each(fn dream ->
+        assert dream.id != reported_dream.id
+      end)
+    end
+  end
+
+  describe "get_dream!" do
     test "IDをもとに夢を返す", %{user: user, dreams: [dream | _]} do
       assert Dreams.get_dream!(user, dream.id) |> Map.get(:id) == dream.id
     end
   end
 
   describe "create_dream" do
-    setup [:create_user, :create_dreams]
-
     test "夢をつくる", %{user: user, tags: tags} do
       tag_names = Enum.map(tags, & &1.name) |> Enum.sort()
       dream_attrs = Fixture.Dreams.dream(%{"tags" => tag_names})
@@ -78,8 +93,6 @@ defmodule LILD.DreamsTest do
   end
 
   describe "update_dream" do
-    setup [:create_user, :create_dreams]
-
     test "夢を更新する", %{dreams: [dream | _]} do
       dream_attrs = Fixture.Dreams.dream(%{"tags" => ["ハッピー"]})
       {:ok, %{dream: dream}} = Dreams.update_dream(dream, dream_attrs)
@@ -119,8 +132,6 @@ defmodule LILD.DreamsTest do
   end
 
   describe "delete_dream" do
-    setup [:create_user, :create_dreams]
-
     test "夢を消す", %{user: user, dreams: [dream | _]} do
       assert {:ok, %Dream{}} = Dreams.delete_dream(dream)
 
@@ -138,6 +149,29 @@ defmodule LILD.DreamsTest do
     end
   end
 
+  describe "report_dream" do
+    test "他人の夢を通報できる", %{user: user, dreams: [_, dream | _]} do
+      {:ok, report} = Dreams.report_dream(user, dream)
+
+      assert report.user_id == user.id
+      assert report.dream_id == dream.id
+    end
+
+    test "何度通報してもReportは1つしかつくらない", %{user: user, dreams: [_, dream | _]} do
+      count = Repo.aggregate(Report, :count, :id)
+
+      {:ok, _} = Dreams.report_dream(user, dream)
+      {:ok, _} = Dreams.report_dream(user, dream)
+      {:ok, _} = Dreams.report_dream(user, dream)
+
+      assert Repo.aggregate(Report, :count, :id) == count + 1
+    end
+
+    test "自分の夢は通報できない", %{user: user, dreams: [dream | _]} do
+      assert {:error, changeset} = Dreams.report_dream(user, dream)
+    end
+  end
+
   defp create_user(_) do
     {:ok, %{user: user}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.social_account())
     {:ok, %{user: another}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.social_account())
@@ -152,5 +186,12 @@ defmodule LILD.DreamsTest do
     {:ok, %{dream: dream3}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"draft" => false, "secret" => false}))
 
     %{dreams: [dream1, dream2, dream3], tags: tags}
+  end
+
+  defp report_dream(%{user: user, another: another, dreams: [user_dream, another_dream | _]}) do
+    {:ok, reported_another_dream} = Dreams.report_dream(user, another_dream)
+    {:ok, reported_user_dream} = Dreams.report_dream(another, user_dream)
+
+    %{reported_dreams: [reported_another_dream, reported_user_dream]}
   end
 end

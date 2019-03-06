@@ -2,7 +2,8 @@ defmodule LILD.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias LILD.Accounts
+  alias LILD.Accounts.SocialAccount
+  alias LILD.Dreams.{Dream, Report}
 
   @primary_key {:id, Ecto.ULID, autogenerate: true}
   @foreign_key_type Ecto.ULID
@@ -10,10 +11,11 @@ defmodule LILD.Accounts.User do
     field :avatar_url, :string
     field :name, :string
 
-    has_one :twitter_account, Accounts.SocialAccount, where: [provider: "twitter.com"]
-    has_one :google_account, Accounts.SocialAccount, where: [provider: "google.com"]
-    has_many :social_accounts, Accounts.SocialAccount
-    has_many :dreams, LILD.Dreams.Dream
+    has_one :twitter_account, SocialAccount, where: [provider: "twitter.com"]
+    has_one :google_account, SocialAccount, where: [provider: "google.com"]
+    has_many :social_accounts, SocialAccount
+    has_many :dreams, Dream
+    has_many :reports, Report
 
     timestamps()
   end
