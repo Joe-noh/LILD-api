@@ -3,13 +3,13 @@ defmodule LILDWeb.SignatureController do
 
   alias LILDWeb.S3Signature
 
-  plug LILDWeb.RequireLoginPlug
+  # plug LILDWeb.RequireLoginPlug
 
   action_fallback LILDWeb.FallbackController
 
   def create(conn, %{"mimetype" => mimetype}) do
     with true <- S3Signature.valid_mimetype?(mimetype),
-         signature = S3Signature.sign(conn.assigns.current_user, "avatars", mimetype) do
+         signature = S3Signature.sign(%{id: Ecto.ULID.generate()}, "avatars", mimetype) do
       conn
       |> put_status(:created)
       |> render("show.json", signature: signature)

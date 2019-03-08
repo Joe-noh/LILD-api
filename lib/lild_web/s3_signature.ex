@@ -12,7 +12,7 @@ defmodule LILDWeb.S3Signature do
       'Content-Type': mimetype,
       acl: "private",
       success_action_status: "201",
-      action: "https://s3.amazonaws.com/#{bucket}",
+      action: "https://#{bucket}.s3.amazonaws.com/",
       AWSAccessKeyId: access_key_id,
       policy: policy,
       signature: hmac_sha1(secret_access_key, policy)
@@ -44,9 +44,9 @@ defmodule LILDWeb.S3Signature do
   end
 
   defp now_plus(seconds) do
-    Time.utc_now()
-    |> Time.add(seconds, :second)
-    |> Time.to_iso8601()
+    DateTime.utc_now()
+    |> DateTime.add(seconds, :second)
+    |> DateTime.to_iso8601()
   end
 
   defp hmac_sha1(secret, message) do
