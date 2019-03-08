@@ -29,6 +29,6 @@ defmodule LILDWeb.Router do
       resources "/dreams", DreamController, only: [:index]
     end
 
-    resources "/signatures", SignatureController, only: [:create]
+    resources "/presigns", PresignController, only: [:create]
   end
 end

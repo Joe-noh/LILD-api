@@ -1,4 +1,4 @@
-defmodule LILDWeb.SignatureControllerTest do
+defmodule LILDWeb.PresignControllerTest do
   use LILDWeb.ConnCase, async: true
 
   alias LILD.Accounts
@@ -6,20 +6,19 @@ defmodule LILDWeb.SignatureControllerTest do
   setup [:create_user, :login_as_user]
 
   describe "create" do
-    test "署名を返す", %{conn: conn, user: user} do
+    test "署名を返す", %{conn: conn} do
       json =
-        post(conn, Routes.signature_path(conn, :create, %{mimetype: "image/jpeg"}))
+        post(conn, Routes.presign_path(conn, :create, %{mimetype: "image/jpeg"}))
         |> json_response(201)
-        |> Map.get("signature")
+        |> Map.get("presign")
 
-      assert json["Content-Type"] == "image/jpeg"
-      assert json["key"] =~ Regex.compile!("^avatars/#{user.id}/[A-Z0-9]+.jpg$")
+      assert json["url"] |> is_binary()
     end
 
     test "ログインしてないときは401", %{conn: conn} do
       errors =
         Plug.Conn.assign(conn, :current_user, nil)
-        |> post(Routes.signature_path(conn, :create, %{mimetype: "image/jpeg"}))
+        |> post(Routes.presign_path(conn, :create, %{mimetype: "image/jpeg"}))
         |> json_response(401)
         |> Map.get("errors")
 
