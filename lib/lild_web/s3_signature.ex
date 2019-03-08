@@ -1,13 +1,14 @@
 defmodule LILDWeb.S3Signature do
-  def sign(filename, mimetype) do
+  def sign(user, prefix, mimetype) do
     [bucket: bucket, access_key_id: access_key_id, secret_access_key: secret_access_key] =
       Application.get_env(:lild, :s3)
       |> Keyword.take([:bucket, :access_key_id, :secret_access_key])
 
-    policy = policy(bucket, filename, mimetype)
+    key = Path.join([prefix, user.id, Ecto.ULID.generate() <> mime_to_ext(mimetype)])
+    policy = policy(bucket, key, mimetype)
 
     %{
-      key: filename,
+      key: key,
       'Content-Type': mimetype,
       acl: "private",
       success_action_status: "201",
@@ -18,15 +19,13 @@ defmodule LILDWeb.S3Signature do
     }
   end
 
-  defp now_plus(seconds) do
-    Time.utc_now()
-    |> Time.add(seconds, :second)
-    |> Time.to_iso8601()
-  end
+  def valid_mimetype?("image/jpeg"), do: true
+  def valid_mimetype?("image/png"), do: true
+  def valid_mimetype?(_), do: false
 
-  defp hmac_sha1(secret, message) do
-    :crypto.hmac(:sha, secret, message) |> Base.encode64
-  end
+  defp mime_to_ext("image/jpeg"), do: ".jpg"
+  defp mime_to_ext("image/png"), do: ".png"
+  defp mime_to_ext(mimetype), do: raise "Unsuppoerted mimetype: #{mimetype}"
 
   defp policy(bucket, key, mimetype, expiration_seconds \\ 60) do
     %{
@@ -42,5 +41,15 @@ defmodule LILDWeb.S3Signature do
     }
     |> Jason.encode!
     |> Base.encode64
+  end
+
+  defp now_plus(seconds) do
+    Time.utc_now()
+    |> Time.add(seconds, :second)
+    |> Time.to_iso8601()
+  end
+
+  defp hmac_sha1(secret, message) do
+    :crypto.hmac(:sha, secret, message) |> Base.encode64
   end
 end
