@@ -28,5 +28,7 @@ defmodule LILDWeb.Router do
     resources "/tags", TagController, only: [:index], alias: Tag do
       resources "/dreams", DreamController, only: [:index]
     end
+
+    resources "/presigns", PresignController, only: [:create]
   end
 end
