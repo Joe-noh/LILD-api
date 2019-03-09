@@ -6,13 +6,14 @@ defmodule LILDWeb.PresignControllerTest do
   setup [:create_user, :login_as_user]
 
   describe "create" do
-    test "署名を返す", %{conn: conn} do
+    test "S3へのアップロードに必要な情報を返す", %{conn: conn} do
       json =
         post(conn, Routes.presign_path(conn, :create, %{mimetype: "image/jpeg"}))
         |> json_response(201)
         |> Map.get("presign")
 
-      assert json["url"] |> is_binary()
+      assert json["url"] == "https://lild-dev.s3.amazonaws.com/"
+      assert json["fields"] |> is_map()
     end
 
     test "ログインしてないときは401", %{conn: conn} do

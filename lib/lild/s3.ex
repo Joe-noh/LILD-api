@@ -1,8 +1,11 @@
 defmodule LILD.S3 do
-  def presigned_url(user, prefix, mimetype) do
+  @algorithm "AWS4-HMAC-SHA256"
+  @encryption "AES256"
+
+  def presign_for_avatar(user, mimetype) do
     if valid_mimetype?(mimetype) do
-      key = Path.join([prefix, user.id, unique_key(mimetype)])
-      signature("private", key, mimetype)
+      key = Path.join(["avatars", user.id, unique_key(mimetype)])
+      presign("private", key, mimetype)
     else
       :error
     end
@@ -20,18 +23,16 @@ defmodule LILD.S3 do
   defp mime_to_ext("image/png"), do: ".png"
   defp mime_to_ext(mimetype), do: raise("Unsuppoerted mimetype: #{mimetype}")
 
-  def signature(acl, key, content_type) do
+  defp presign(acl, key, content_type) do
     [region: region, bucket: bucket, access_key_id: access_key_id, secret_access_key: secret_access_key] =
       Application.get_env(:lild, :s3)
       |> Keyword.take([:region, :bucket, :access_key_id, :secret_access_key])
 
-    now = %DateTime{DateTime.utc_now() | second: 0, microsecond: {0, 0}}
+    now = %DateTime{DateTime.utc_now() | microsecond: {0, 0}}
     date = current_date(now)
 
-    algorithm = "AWS4-HMAC-SHA256"
     credential = "#{access_key_id}/#{date}/#{region}/s3/aws4_request"
     timestamp = current_timestamp(now)
-    encryption = "AES256"
 
     conditions = [
       %{"acl" => acl},
@@ -39,29 +40,46 @@ defmodule LILD.S3 do
       %{"bucket" => bucket},
       %{"Content-Type" => content_type},
       ["content-length-range", "0", Integer.to_string(1024 * 1024)],
-      %{"x-amz-algorithm" => algorithm},
+      %{"x-amz-algorithm" => @algorithm},
       %{"x-amz-credential" => credential},
       %{"x-amz-date" => timestamp},
-      %{"x-amz-server-side-encryption" => encryption}
+      %{"x-amz-server-side-encryption" => @encryption}
     ]
 
     encoded_policy = encoded_policy(now, conditions)
     encoded_signature = encoded_signature(secret_access_key, date, region, encoded_policy)
 
-    IO.puts ~s"""
-      curl -v -X POST \\
-        -F Content-Type="#{content_type}"
-        -F acl="#{acl}" \\
-        -F key="#{key}" \\
-        -F policy="#{encoded_policy}" \\
-        -F x-amz-algorithm="AWS4-HMAC-SHA256" \\
-        -F x-amz-credential="#{access_key_id}/#{date}/#{region}/s3/aws4_request" \\
-        -F x-amz-date="#{timestamp}" \\
-        -F x-amz-signature="#{encoded_signature}" \\
-        -F x-amz-server-side-encryption="AES256" \\
-        -F "file=@image.jpg" \\
-        https://#{bucket}.s3.amazonaws.com/
-    """
+    # IO.puts ~s"""
+    #   curl -v -X POST \\
+    #     -F Content-Type="#{content_type}"
+    #     -F acl="#{acl}" \\
+    #     -F key="#{key}" \\
+    #     -F policy="#{encoded_policy}" \\
+    #     -F x-amz-algorithm="AWS4-HMAC-SHA256" \\
+    #     -F x-amz-credential="#{access_key_id}/#{date}/#{region}/s3/aws4_request" \\
+    #     -F x-amz-date="#{timestamp}" \\
+    #     -F x-amz-signature="#{encoded_signature}" \\
+    #     -F x-amz-server-side-encryption="AES256" \\
+    #     -F "file=@image.jpg" \\
+    #     https://#{bucket}.s3.amazonaws.com/
+    # """
+
+    presign = %{
+      url: "https://#{bucket}.s3.amazonaws.com/",
+      fields: %{
+        "Content-Type" => content_type,
+        "acl" => acl,
+        "key" => key,
+        "policy" => encoded_policy,
+        "x-amz-algorithm" => @algorithm,
+        "x-amz-credential" => "#{access_key_id}/#{date}/#{region}/s3/aws4_request",
+        "x-amz-date" => timestamp,
+        "x-amz-signature" => encoded_signature,
+        "x-amz-server-side-encryption" => @encryption
+      }
+    }
+
+    {:ok, presign}
   end
 
   defp current_date(now) do

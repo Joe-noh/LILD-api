@@ -6,6 +6,6 @@ defmodule LILDWeb.PresignView do
   end
 
   def render("presign.json", %{presign: presign}) do
-    %{url: presign.url}
+    %{url: presign.url, fields: presign.fields}
   end
 end
