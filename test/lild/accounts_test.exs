@@ -1,6 +1,7 @@
 defmodule LILD.AccountsTest do
   use LILD.DataCase, async: true
 
+  import Mock
   alias LILD.Accounts
 
   describe "get_user!" do
@@ -56,6 +57,15 @@ defmodule LILD.AccountsTest do
       assert_raise Ecto.NoResultsError, fn ->
         Accounts.get_user!(user.id)
       end
+    end
+  end
+
+  describe "verify_id_token" do
+    test_with_mock "UserとSocialAccountをつくるパラメータを取り出す", Jwt, [:passthrough], verify: fn _ -> {:ok, Fixture.Accounts.firebase_id_token_payload()} end do
+      {:ok, user_params, social_account_params} = Accounts.verify_id_token("firebase.id.token")
+
+      assert %{"name" => _, "avatar_url" => _} = user_params
+      assert %{"provider" => _, "uid" => _} = social_account_params
     end
   end
 
