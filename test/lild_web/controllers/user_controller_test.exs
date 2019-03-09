@@ -1,5 +1,5 @@
 defmodule LILDWeb.UserControllerTest do
-  use LILDWeb.ConnCase, async: true
+  use LILDWeb.ConnCase, async: false
 
   import Mock
   alias LILD.{Accounts, Dreams}
