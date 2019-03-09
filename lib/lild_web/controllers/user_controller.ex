@@ -10,17 +10,31 @@ defmodule LILDWeb.UserController do
   action_fallback LILDWeb.FallbackController
 
   def create(conn, %{"id_token" => id_token}) do
-    with {:ok, user_params, social_account_params} <- Accounts.verify_id_token(id_token),
-         {:ok, %{user: %User{} = user}} <- Accounts.create_user(user_params, social_account_params),
-         {:ok, token, _payload} <- LILDWeb.AccessToken.encode(user) do
-      conn
-      |> put_status(:created)
-      |> put_view(LILDWeb.SessionView)
-      |> render("show.json", user: user, token: token)
+    with {:ok, user_params, social_account_params = %{"uid" => uid, "provider" => provider}} <- Accounts.verify_id_token(id_token) do
+      case Accounts.get_user_by_social_account(provider, uid) do
+        nil -> handle_new_user(conn, user_params, social_account_params)
+        user -> handle_authenticated(conn, user)
+      end
     else
       {:error, _, changeset, _} ->
         {:error, changeset}
     end
+  end
+
+  defp handle_new_user(conn, user_params, social_account_params) do
+    case Accounts.create_user(user_params, social_account_params) do
+      {:ok, %{user: %User{} = user}} -> handle_authenticated(conn, user)
+      {:error, _, changeset, _} -> {:error, changeset}
+    end
+  end
+
+  defp handle_authenticated(conn, user) do
+    {:ok, token, _payload} = LILDWeb.AccessToken.encode(user)
+
+    conn
+    |> put_status(:created)
+    |> put_view(LILDWeb.SessionView)
+    |> render("show.json", user: user, token: token)
   end
 
   def show(conn, %{"id" => id}) do
