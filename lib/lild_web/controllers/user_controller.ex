@@ -9,8 +9,8 @@ defmodule LILDWeb.UserController do
 
   action_fallback LILDWeb.FallbackController
 
-  def create(conn, %{"user" => user_params, "firebase" => %{"id_token" => id_token}}) do
-    with {:ok, social_account_params} <- Accounts.verify_id_token(id_token),
+  def create(conn, %{"id_token" => id_token}) do
+    with {:ok, user_params, social_account_params} <- Accounts.verify_id_token(id_token),
          {:ok, %{user: %User{} = user}} <- Accounts.create_user(user_params, social_account_params),
          {:ok, token, _payload} <- LILDWeb.AccessToken.encode(user) do
       conn

@@ -49,11 +49,11 @@ defmodule LILD.Accounts do
   end
 
   def verify_id_token(id_token) do
-    with {:ok, %{"firebase" => payload}} <- Jwt.verify(id_token) do
-      %{"sign_in_provider" => provider, "identities" => identities} = payload
+    with {:ok, %{"name" => name, "picture" => picture, "firebase" => firebase}} <- Jwt.verify(id_token) do
+      %{"sign_in_provider" => provider, "identities" => identities} = firebase
       [uid] = Map.get(identities, provider)
 
-      {:ok, %{"uid" => uid, "provider" => provider}}
+      {:ok, %{"name" => name, "avatar_url" => picture}, %{"uid" => uid, "provider" => provider}}
     end
   end
 end
