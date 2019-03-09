@@ -17,6 +17,16 @@ defmodule LILDWeb.UserControllerTest do
       assert json["user"]["avatar_url"] == @firebase_response["picture"]
       assert json["auth"]["token"] |> is_binary
     end
+
+    test_with_mock "ユーザが存在する場合はそれを返す", %{conn: conn}, Jwt, [:passthrough], verify: fn _ -> {:ok, @firebase_response} end do
+      _json = post(conn, Routes.user_path(conn, :create), Fixture.Accounts.firebase()) |> json_response(201)
+      json = post(conn, Routes.user_path(conn, :create), Fixture.Accounts.firebase()) |> json_response(201)
+
+      assert json["user"]["id"] |> is_binary
+      assert json["user"]["name"] == @firebase_response["name"]
+      assert json["user"]["avatar_url"] == @firebase_response["picture"]
+      assert json["auth"]["token"] |> is_binary
+    end
   end
 
   describe "update" do
