@@ -172,6 +172,19 @@ defmodule LILD.DreamsTest do
     end
   end
 
+  describe "search_tags" do
+    setup do
+      Dreams.create_tags(~w[nightmare happy 留年])
+      :ok
+    end
+
+    test "曖昧なタグの検索ができる" do
+      [tag] = Dreams.search_tags("nighm")
+
+      assert tag.name == "nightmare"
+    end
+  end
+
   defp create_user(_) do
     {:ok, %{user: user}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.social_account())
     {:ok, %{user: another}} = Accounts.create_user(Fixture.Accounts.user(), Fixture.Accounts.social_account())

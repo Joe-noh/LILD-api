@@ -114,7 +114,7 @@ defmodule LILD.Dreams do
     {:ok, tags}
   end
 
-  def search_tag(query) do
+  def search_tags(query) do
     Tag
     |> where([t], fragment("levenshtein(LOWER(?), LOWER(?), 1, 1, 2)", t.name, ^query) <= 5)
     |> order_by([t], fragment("levenshtein(LOWER(?), LOWER(?), 1, 1, 2)", t.name, ^query))
