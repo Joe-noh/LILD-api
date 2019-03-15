@@ -114,6 +114,14 @@ defmodule LILD.Dreams do
     {:ok, tags}
   end
 
+  def search_tag(query) do
+    Tag
+    |> where([t], fragment("levenshtein(LOWER(?), LOWER(?), 1, 1, 2)", t.name, ^query) <= 5)
+    |> order_by([t], fragment("levenshtein(LOWER(?), LOWER(?), 1, 1, 2)", t.name, ^query))
+    |> limit(10)
+    |> Repo.all
+  end
+
   def report_dream(user = %User{}, dream = %Dream{}) do
     %Report{user_id: user.id, dream_id: dream.id}
     |> Report.changeset(%{})
