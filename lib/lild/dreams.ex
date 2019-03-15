@@ -114,12 +114,10 @@ defmodule LILD.Dreams do
     {:ok, tags}
   end
 
-  def search_tags(query) do
-    Tag
-    |> where([t], fragment("levenshtein(LOWER(?), LOWER(?), 1, 1, 2)", t.name, ^query) <= 5)
-    |> order_by([t], fragment("levenshtein(LOWER(?), LOWER(?), 1, 1, 2)", t.name, ^query))
-    |> limit(10)
-    |> Repo.all
+  def search_tags_query(queryable, query) do
+    queryable
+    |> where([t], fragment("? % ?", t.name, ^query))
+    |> order_by([t], fragment("similarity(?, ?) DESC", t.name, ^query))
   end
 
   def report_dream(user = %User{}, dream = %Dream{}) do

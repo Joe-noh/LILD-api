@@ -172,14 +172,14 @@ defmodule LILD.DreamsTest do
     end
   end
 
-  describe "search_tags" do
+  describe "search_tags_query" do
     setup do
       Dreams.create_tags(~w[nightmare happy 留年])
       :ok
     end
 
     test "曖昧なタグの検索ができる" do
-      [tag] = Dreams.search_tags("nighm")
+      [tag] = Dreams.search_tags_query(Tag, "nighm") |> Repo.all
 
       assert tag.name == "nightmare"
     end
