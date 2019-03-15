@@ -118,6 +118,7 @@ defmodule LILD.Dreams do
     queryable
     |> where([t], fragment("? % ?", t.name, ^query))
     |> order_by([t], fragment("similarity(?, ?) DESC", t.name, ^query))
+    |> limit(20)
   end
 
   def report_dream(user = %User{}, dream = %Dream{}) do

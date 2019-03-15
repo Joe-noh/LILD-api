@@ -6,14 +6,13 @@ defmodule LILDWeb.TagControllerTest do
   setup [:create_tag]
 
   describe "index" do
-    test "タグを全部返す", %{conn: conn, tags: tags} do
-      ids =
-        get(conn, Routes.tag_path(conn, :index))
+    test "タグを名前で検索して返す", %{conn: conn, tags: [nightmare | _]} do
+      [tag] =
+        get(conn, Routes.tag_path(conn, :index), q: "night")
         |> json_response(200)
         |> Map.get("tags")
-        |> Enum.map(&Map.get(&1, "id"))
 
-      Enum.each(tags, fn tag -> assert tag.id in ids end)
+      assert tag["name"] == nightmare.name
     end
   end
 
