@@ -5,8 +5,8 @@ defmodule LILDWeb.TagController do
 
   action_fallback LILDWeb.FallbackController
 
-  def index(conn, _params) do
-    tags = Dreams.list_tags()
+  def index(conn, %{"q" => query}) do
+    tags = Dreams.search_tags_query(Dreams.Tag, query) |> LILD.Repo.all
     render(conn, "index.json", tags: tags)
   end
 end

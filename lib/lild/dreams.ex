@@ -114,6 +114,13 @@ defmodule LILD.Dreams do
     {:ok, tags}
   end
 
+  def search_tags_query(queryable, query) do
+    queryable
+    |> where([t], fragment("? % ?", t.name, ^query))
+    |> order_by([t], fragment("similarity(?, ?) DESC", t.name, ^query))
+    |> limit(20)
+  end
+
   def report_dream(user = %User{}, dream = %Dream{}) do
     %Report{user_id: user.id, dream_id: dream.id}
     |> Report.changeset(%{})
