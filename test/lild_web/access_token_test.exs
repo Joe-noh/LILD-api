@@ -10,6 +10,7 @@ defmodule LILDWeb.AccessTokenTest do
     assert payload["sub"] == "12345"
     assert payload["aud"] == "user"
     assert payload["iss"] == "LILD"
+    assert payload["token_type"] == "access"
     assert_in_delta payload["exp"] - payload["iat"], 24 * 60 * 60, 1
   end
 end
