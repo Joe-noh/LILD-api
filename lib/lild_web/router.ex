@@ -9,6 +9,8 @@ defmodule LILDWeb.Router do
   scope "/v1", LILDWeb do
     pipe_through :api
 
+    resources "/sessions", SessionController, only: [:create]
+
     scope "/my", alias: My, as: :my do
       resources "/dreams", DreamController, only: [:index]
 
