@@ -2,16 +2,18 @@ defmodule LILDWeb.SessionController do
   use LILDWeb, :controller
 
   alias LILD.Accounts
+  alias LILDWeb.{AccessToken, RefreshToken}
 
   action_fallback LILDWeb.FallbackController
 
-  def create(conn, %{"firebase" => %{"id_token" => id_token}}) do
-    with {:ok, %{"uid" => uid, "provider" => provider}} <- Accounts.verify_id_token(id_token),
-         user when not is_nil(user) <- Accounts.get_user_by_social_account(provider, uid),
-         {:ok, token, _payload} <- LILDWeb.AccessToken.encode(user) do
+  def update(conn, %{"refresh_token" => refresh_token}) do
+    with {:ok, %{"sub" => user_id}} <- RefreshToken.decode(refresh_token),
+         user <- Accounts.get_user!(user_id) do
+      {:ok, access_token, _payload} = AccessToken.encode(user)
+      {:ok, refresh_token, _payload} = RefreshToken.encode(user)
+
       conn
-      |> put_status(:created)
-      |> render("show.json", user: user, token: token)
+      |> render("show.json", user: user, access_token: access_token, refresh_token: refresh_token)
     else
       _ -> {:error, :unauthorized}
     end
