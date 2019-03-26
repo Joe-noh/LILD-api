@@ -29,12 +29,13 @@ defmodule LILDWeb.UserController do
   end
 
   defp handle_authenticated(conn, user) do
-    {:ok, token, _payload} = LILDWeb.AccessToken.encode(user)
+    {:ok, access_token, _payload} = LILDWeb.AccessToken.encode(user)
+    {:ok, refresh_token, _payload} = LILDWeb.RefreshToken.encode(user)
 
     conn
     |> put_status(:created)
     |> put_view(LILDWeb.SessionView)
-    |> render("show.json", user: user, token: token)
+    |> render("show.json", user: user, access_token: access_token, refresh_token: refresh_token)
   end
 
   def show(conn, %{"id" => id}) do
