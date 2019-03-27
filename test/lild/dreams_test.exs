@@ -29,12 +29,12 @@ defmodule LILD.DreamsTest do
   end
 
   describe "published_dreams" do
-    test "下書きでも非公開でもない夢を返すクエリを返す" do
-      Dreams.published_dreams(Dream)
+    test "公開済みの夢のうち、他者の非公開を除く夢を返すクエリを返す", %{user: user} do
+      Dreams.published_dreams(Dream, user)
       |> Repo.all()
       |> Enum.each(fn dream ->
         refute dream.draft
-        refute dream.secret
+        refute dream.secret and dream.user_id != user.id
       end)
     end
   end
@@ -194,11 +194,18 @@ defmodule LILD.DreamsTest do
 
   defp create_dreams(%{user: user, another: another}) do
     {:ok, tags = [tag | _]} = Dreams.create_tags(["nightmare", "予知夢好きと繋がりたい"])
-    {:ok, %{dream: dream1}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"tags" => [tag.name]}))
-    {:ok, %{dream: dream2}} = Dreams.create_dream(another, Fixture.Dreams.dream(%{"tags" => [tag.name]}))
-    {:ok, %{dream: dream3}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"draft" => false, "secret" => false}))
+    {:ok, %{dream: d1}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"tags" => [tag.name]}))
+    {:ok, %{dream: d2}} = Dreams.create_dream(another, Fixture.Dreams.dream(%{"tags" => [tag.name]}))
+    {:ok, %{dream: d3}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"draft" => false, "secret" => false}))
+    {:ok, %{dream: d4}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"draft" => true, "secret" => false}))
+    {:ok, %{dream: d5}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"draft" => false, "secret" => true}))
+    {:ok, %{dream: d6}} = Dreams.create_dream(user, Fixture.Dreams.dream(%{"draft" => true, "secret" => true}))
+    {:ok, %{dream: d7}} = Dreams.create_dream(another, Fixture.Dreams.dream(%{"draft" => false, "secret" => false}))
+    {:ok, %{dream: d8}} = Dreams.create_dream(another, Fixture.Dreams.dream(%{"draft" => true, "secret" => false}))
+    {:ok, %{dream: d9}} = Dreams.create_dream(another, Fixture.Dreams.dream(%{"draft" => false, "secret" => true}))
+    {:ok, %{dream: d10}} = Dreams.create_dream(another, Fixture.Dreams.dream(%{"draft" => true, "secret" => true}))
 
-    %{dreams: [dream1, dream2, dream3], tags: tags}
+    %{dreams: [d1, d2, d3, d4, d5, d6, d7, d8, d9, d10], tags: tags}
   end
 
   defp report_dream(%{user: user, another: another, dreams: [user_dream, another_dream | _]}) do

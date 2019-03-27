@@ -15,7 +15,7 @@ defmodule LILDWeb.Tag.DreamController do
     %{entries: dreams, metadata: metadata} =
       conn.assigns.tag
       |> Dreams.dreams_query()
-      |> Dreams.published_dreams()
+      |> Dreams.published_dreams(conn.assigns.current_user)
       |> Dreams.without_reported_dreams(conn.assigns.current_user)
       |> Dreams.ordered(order)
       |> LILD.Repo.paginate(pagenate_opts)
