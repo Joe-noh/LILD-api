@@ -10,6 +10,7 @@ defmodule LILDWeb.Router do
     pipe_through :api
 
     resources "/sessions", SessionController, only: [:update], singleton: true
+    resources "/dreams", DreamController, only: [:index]
 
     scope "/my", alias: My, as: :my do
       resources "/dreams", DreamController, only: [:index]
