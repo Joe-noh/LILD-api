@@ -17,7 +17,7 @@ defmodule LILDWeb.User.DreamController do
 
     %{entries: dreams, metadata: metadata} =
       conn.assigns.user
-      |> Dreams.dreams_query()
+      |> Dreams.dreams_query([:tags, :user])
       |> Dreams.published_dreams(conn.assigns.current_user)
       |> Dreams.without_reported_dreams(conn.assigns.current_user)
       |> Dreams.ordered(order)
@@ -31,6 +31,8 @@ defmodule LILDWeb.User.DreamController do
   def create(conn, %{"dream" => dream_params}) do
     with user = conn.assigns.current_user,
          {:ok, %{dream: %Dream{} = dream}} <- Dreams.create_dream(user, dream_params) do
+      dream = Dreams.dreams_query(dream, [:tags, :user]) |> LILD.Repo.one()
+
       conn
       |> put_status(:created)
       |> put_view(LILDWeb.DreamView)
@@ -48,6 +50,8 @@ defmodule LILDWeb.User.DreamController do
   def update(conn, %{"dream" => dream_params}) do
     with dream = conn.assigns.dream,
          {:ok, %{dream: %Dream{} = dream}} <- Dreams.update_dream(dream, dream_params) do
+      dream = Dreams.dreams_query(dream, [:tags, :user]) |> LILD.Repo.one()
+
       conn
       |> put_view(LILDWeb.DreamView)
       |> render("show.json", dream: dream)

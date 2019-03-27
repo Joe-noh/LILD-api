@@ -13,7 +13,7 @@ defmodule LILDWeb.My.Dream.DraftController do
 
     %{entries: dreams, metadata: metadata} =
       conn.assigns.current_user
-      |> Dreams.dreams_query()
+      |> Dreams.dreams_query([:tags, :user])
       |> Dreams.only_draft_dreams()
       |> Dreams.ordered(order)
       |> LILD.Repo.paginate(pagenate_opts)

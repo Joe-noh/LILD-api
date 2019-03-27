@@ -10,12 +10,22 @@ defmodule LILD.Dreams do
   alias LILD.Dreams.{Dream, Tag, Report}
   alias LILD.Accounts.User
 
-  def dreams_query(user = %User{}) do
-    user |> Ecto.assoc(:dreams)
+  def dreams_query(struct, assoc \\ [])
+
+  def dreams_query(user = %User{}, assoc) do
+    user |> Ecto.assoc(:dreams) |> preload(^assoc)
   end
 
-  def dreams_query(tag = %Tag{}) do
-    tag |> Ecto.assoc(:dreams)
+  def dreams_query(tag = %Tag{}, assoc) do
+    tag |> Ecto.assoc(:dreams) |> preload(^assoc)
+  end
+
+  def dreams_query(dream = %Dream{}, assoc) do
+    Dream |> where(id: ^dream.id) |> preload(^assoc)
+  end
+
+  def dreams_query(queryable, assoc) do
+    queryable |> preload(^assoc)
   end
 
   def ordered(queryable, order) do

@@ -19,7 +19,9 @@ defmodule LILDWeb.DreamView do
       body: dream.body,
       date: dream.date,
       secret: dream.secret,
-      draft: dream.draft
+      draft: dream.draft,
+      tags: render_many(dream.tags, LILDWeb.TagView, "tag.json"),
+      user: render_one(dream.user, LILDWeb.UserView, "user.json")
     }
   end
 end

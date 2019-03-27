@@ -14,6 +14,7 @@ defmodule LILDWeb.DreamController do
 
     %{entries: dreams, metadata: metadata} =
       Dream
+      |> Dreams.dreams_query([:tags, :user])
       |> Dreams.published_dreams(conn.assigns.current_user)
       |> Dreams.without_reported_dreams(conn.assigns.current_user)
       |> Dreams.ordered(order)
