@@ -1,7 +1,8 @@
-defmodule LILDWeb.My.Dream.DraftController do
+defmodule LILDWeb.DreamController do
   use LILDWeb, :controller
 
   alias LILD.Dreams
+  alias LILD.Dreams.Dream
 
   plug LILDWeb.RequireLoginPlug
 
@@ -12,9 +13,10 @@ defmodule LILDWeb.My.Dream.DraftController do
     pagenate_opts = [cursor_fields: Keyword.values(order), before: params["before"], after: params["after"]]
 
     %{entries: dreams, metadata: metadata} =
-      conn.assigns.current_user
+      Dream
       |> Dreams.dreams_query([:tags, :user])
-      |> Dreams.only_draft_dreams()
+      |> Dreams.published_dreams(conn.assigns.current_user)
+      |> Dreams.without_reported_dreams(conn.assigns.current_user)
       |> Dreams.ordered(order)
       |> LILD.Repo.paginate(pagenate_opts)
 

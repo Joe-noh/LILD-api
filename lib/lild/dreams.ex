@@ -10,20 +10,33 @@ defmodule LILD.Dreams do
   alias LILD.Dreams.{Dream, Tag, Report}
   alias LILD.Accounts.User
 
-  def dreams_query(user = %User{}) do
-    user |> Ecto.assoc(:dreams)
+  def dreams_query(struct, assoc \\ [])
+
+  def dreams_query(user = %User{}, assoc) do
+    user |> Ecto.assoc(:dreams) |> preload(^assoc)
   end
 
-  def dreams_query(tag = %Tag{}) do
-    tag |> Ecto.assoc(:dreams)
+  def dreams_query(tag = %Tag{}, assoc) do
+    tag |> Ecto.assoc(:dreams) |> preload(^assoc)
+  end
+
+  def dreams_query(dream = %Dream{}, assoc) do
+    Dream |> where(id: ^dream.id) |> preload(^assoc)
+  end
+
+  def dreams_query(queryable, assoc) do
+    queryable |> preload(^assoc)
   end
 
   def ordered(queryable, order) do
     queryable |> order_by(^order)
   end
 
-  def published_dreams(queryable) do
-    queryable |> where(draft: false, secret: false)
+  def published_dreams(queryable, viewer) do
+    queryable
+    |> join(:left, [d], u in assoc(d, :user), as: :user)
+    |> where([d], d.draft == false and d.secret == false)
+    |> or_where([d, user: u], d.draft == false and d.secret == true and u.id == ^viewer.id)
   end
 
   def without_draft_dreams(queryable) do
@@ -37,8 +50,8 @@ defmodule LILD.Dreams do
   def without_reported_dreams(queryable, reporter) do
     queryable
     |> join(:left, [d], r in assoc(d, :reports), as: :report)
-    |> join(:left, [report: r], u in User, on: u.id == r.user_id and u.id == ^reporter.id, as: :user)
-    |> where([user: u], is_nil(u.id))
+    |> join(:left, [report: r], u in User, on: u.id == r.user_id and u.id == ^reporter.id, as: :reported_user)
+    |> where([reported_user: u], is_nil(u.id))
   end
 
   def get_dream!(id) do
