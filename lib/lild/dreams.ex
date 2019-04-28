@@ -131,7 +131,7 @@ defmodule LILD.Dreams do
     query = String.replace_leading(query, "#", "")
 
     queryable
-    |> where([t], fragment("? % ?", t.name, ^query))
+    |> where([t], fragment("levenshtein_less_equal(?, ?, 5) <= 5", t.name, ^query))
     |> order_by([t], fragment("similarity(?, ?) DESC", t.name, ^query))
     |> limit(20)
   end
