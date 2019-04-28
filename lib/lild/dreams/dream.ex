@@ -24,5 +24,13 @@ defmodule LILD.Dreams.Dream do
     dream
     |> cast(attrs, [:body, :date, :secret, :draft])
     |> validate_required([:body, :date, :secret, :draft])
+    |> trim(:body)
+  end
+
+  defp trim(changeset, attr) do
+    case get_change(changeset, attr) do
+      nil -> changeset
+      body -> put_change(changeset, attr, String.trim(body))
+    end
   end
 end
