@@ -186,13 +186,13 @@ defmodule LILD.DreamsTest do
     end
 
     test "曖昧なタグの検索ができる" do
-      [tag] = Dreams.search_tags_query(Tag, "nighm") |> Repo.all()
+      [tag | _] = Dreams.search_tags_query(Tag, "nighm") |> Repo.all()
 
       assert tag.name == "nightmare"
     end
 
     test "先頭の#は無視する" do
-      [tag] = Dreams.search_tags_query(Tag, "#################nighm") |> Repo.all()
+      [tag | _] = Dreams.search_tags_query(Tag, "#################nighm") |> Repo.all()
 
       assert tag.name == "nightmare"
     end
