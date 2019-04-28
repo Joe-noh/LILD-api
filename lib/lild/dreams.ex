@@ -128,6 +128,8 @@ defmodule LILD.Dreams do
   end
 
   def search_tags_query(queryable, query) do
+    query = String.replace_leading(query, "#", "")
+
     queryable
     |> where([t], fragment("? % ?", t.name, ^query))
     |> order_by([t], fragment("similarity(?, ?) DESC", t.name, ^query))

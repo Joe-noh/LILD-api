@@ -190,6 +190,12 @@ defmodule LILD.DreamsTest do
 
       assert tag.name == "nightmare"
     end
+
+    test "先頭の#は無視する" do
+      [tag] = Dreams.search_tags_query(Tag, "#################nighm") |> Repo.all
+
+      assert tag.name == "nightmare"
+    end
   end
 
   defp create_user(_) do
