@@ -90,6 +90,13 @@ defmodule LILD.DreamsTest do
       assert tag.name == "foooo"
       assert Tag |> where(name: "foooo") |> Repo.one()
     end
+
+    test "タグ名の先頭から#を消す", %{user: user} do
+      dream_attrs = Fixture.Dreams.dream(%{"tags" => ["#withhash"]})
+      {:ok, %{dream: %Dream{tags: [tag]}}} = Dreams.create_dream(user, dream_attrs)
+
+      assert tag.name == "withhash"
+    end
   end
 
   describe "update_dream" do
@@ -179,7 +186,13 @@ defmodule LILD.DreamsTest do
     end
 
     test "曖昧なタグの検索ができる" do
-      [tag] = Dreams.search_tags_query(Tag, "nighm") |> Repo.all
+      [tag] = Dreams.search_tags_query(Tag, "nighm") |> Repo.all()
+
+      assert tag.name == "nightmare"
+    end
+
+    test "先頭の#は無視する" do
+      [tag] = Dreams.search_tags_query(Tag, "#################nighm") |> Repo.all()
 
       assert tag.name == "nightmare"
     end

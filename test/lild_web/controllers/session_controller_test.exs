@@ -8,6 +8,7 @@ defmodule LILDWeb.SessionControllerTest do
 
     test "refresh tokenとaccess tokenを交換する", %{conn: conn, user: user} do
       {:ok, refresh_token, _payload} = RefreshToken.encode(user)
+
       json =
         put(conn, Routes.session_path(conn, :update), %{refresh_token: refresh_token})
         |> json_response(200)
@@ -20,7 +21,7 @@ defmodule LILDWeb.SessionControllerTest do
     end
 
     test "refresh tokenが期限切れの場合は401", %{conn: conn, user: user} do
-      while_ago = DateTime.utc_now |> DateTime.add(-10, :second) |> DateTime.to_unix
+      while_ago = DateTime.utc_now() |> DateTime.add(-10, :second) |> DateTime.to_unix()
       {:ok, refresh_token, _payload} = RefreshToken.generate_and_sign(%{"exp" => while_ago, "sub" => user.id})
 
       errors =
