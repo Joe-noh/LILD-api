@@ -90,6 +90,13 @@ defmodule LILD.DreamsTest do
       assert tag.name == "foooo"
       assert Tag |> where(name: "foooo") |> Repo.one()
     end
+
+    test "タグ名の先頭から#を消す", %{user: user} do
+      dream_attrs = Fixture.Dreams.dream(%{"tags" => ["#withhash"]})
+      {:ok, %{dream: %Dream{tags: [tag]}}} = Dreams.create_dream(user, dream_attrs)
+
+      assert tag.name == "withhash"
+    end
   end
 
   describe "update_dream" do
