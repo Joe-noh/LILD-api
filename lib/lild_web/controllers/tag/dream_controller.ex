@@ -3,7 +3,6 @@ defmodule LILDWeb.Tag.DreamController do
 
   alias LILD.Dreams
 
-  plug LILDWeb.RequireLoginPlug
   plug :assign_tag
 
   action_fallback LILDWeb.FallbackController

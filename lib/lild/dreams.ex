@@ -32,6 +32,10 @@ defmodule LILD.Dreams do
     queryable |> order_by(^order)
   end
 
+  def published_dreams(queryable, nil) do
+    queryable
+  end
+
   def published_dreams(queryable, viewer) do
     queryable
     |> join(:left, [d], u in assoc(d, :user), as: :user)
@@ -45,6 +49,10 @@ defmodule LILD.Dreams do
 
   def only_draft_dreams(queryable) do
     queryable |> where(draft: true)
+  end
+
+  def without_reported_dreams(queryable, nil) do
+    queryable
   end
 
   def without_reported_dreams(queryable, reporter) do
