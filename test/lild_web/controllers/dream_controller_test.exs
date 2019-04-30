@@ -38,7 +38,8 @@ defmodule LILDWeb.DreamControllerTest do
         |> json_response(200)
         |> Map.get("dreams")
 
-      assert length(dreams) == 5
+      assert length(dreams) == 4
+      Enum.each(dreams, &(refute &1["secret"]))
     end
   end
 
