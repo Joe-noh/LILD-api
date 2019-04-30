@@ -32,11 +32,14 @@ defmodule LILD.Dreams do
     queryable |> order_by(^order)
   end
 
+  def published_dreams(queryable, nil) do
+    queryable |> where([d], d.draft == false and d.secret == false)
+  end
+
   def published_dreams(queryable, viewer) do
     queryable
     |> join(:left, [d], u in assoc(d, :user), as: :user)
-    |> where([d], d.draft == false and d.secret == false)
-    |> or_where([d, user: u], d.draft == false and d.secret == true and u.id == ^viewer.id)
+    |> where([d, user: u], d.draft == false and (d.secret == false or u.id == ^viewer.id))
   end
 
   def without_draft_dreams(queryable) do
@@ -45,6 +48,10 @@ defmodule LILD.Dreams do
 
   def only_draft_dreams(queryable) do
     queryable |> where(draft: true)
+  end
+
+  def without_reported_dreams(queryable, nil) do
+    queryable
   end
 
   def without_reported_dreams(queryable, reporter) do

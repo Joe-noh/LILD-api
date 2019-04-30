@@ -1,5 +1,5 @@
 defmodule LILDWeb.ReportControllerTest do
-  use LILDWeb.ConnCase
+  use LILDWeb.ConnCase, async: true
 
   alias LILD.Accounts
   alias LILD.Dreams

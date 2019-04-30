@@ -1,5 +1,5 @@
 defmodule LILDWeb.TagControllerTest do
-  use LILDWeb.ConnCase
+  use LILDWeb.ConnCase, async: true
 
   alias LILD.Dreams
 
@@ -13,6 +13,17 @@ defmodule LILDWeb.TagControllerTest do
         |> Map.get("tags")
 
       assert tag["name"] == nightmare.name
+    end
+  end
+
+  describe "show" do
+    test "idからタグを引いて返す", %{conn: conn, tags: [%{id: id} | _]} do
+      tag =
+        get(conn, Routes.tag_path(conn, :show, id))
+        |> json_response(200)
+        |> Map.get("tag")
+
+      assert tag["id"] == id
     end
   end
 

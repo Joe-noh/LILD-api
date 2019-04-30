@@ -25,6 +25,17 @@ defmodule LILDWeb.Tag.DreamControllerTest do
 
       assert %{"before" => _, "after" => _} = metadata
     end
+
+    test "ログインしていなくても夢を返す", %{conn: conn, tags: [tag | _]} do
+      dreams =
+        conn
+        |> Plug.Conn.assign(:current_user, nil)
+        |> get(Routes.tag_dream_path(conn, :index, tag))
+        |> json_response(200)
+        |> Map.get("dreams")
+
+      assert length(dreams) == 2
+    end
   end
 
   defp create_user(_) do
