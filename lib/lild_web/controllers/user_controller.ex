@@ -4,7 +4,7 @@ defmodule LILDWeb.UserController do
   alias LILD.Accounts
   alias LILD.Accounts.User
 
-  plug LILDWeb.RequireLoginPlug when action in [:show, :update, :delete]
+  plug LILDWeb.RequireLoginPlug when action in [:update, :delete]
   plug :check_access_restrictions when action in [:update, :delete]
 
   action_fallback LILDWeb.FallbackController
