@@ -4,8 +4,9 @@ defmodule LILDWeb.UserController do
   alias LILD.Accounts
   alias LILD.Accounts.User
 
-  plug LILDWeb.RequireLoginPlug when action in [:show, :update, :delete]
+  plug LILDWeb.RequireLoginPlug when action in [:update, :delete]
   plug :check_access_restrictions when action in [:update, :delete]
+  plug :assign_user when action in [:show, :update, :delete]
 
   action_fallback LILDWeb.FallbackController
 
@@ -38,23 +39,21 @@ defmodule LILDWeb.UserController do
     |> render("show.json", user: user, access_token: access_token, refresh_token: refresh_token)
   end
 
-  def show(conn, %{"id" => id}) do
-    user = Accounts.get_user!(id)
+  def show(conn, _params) do
+    user = conn.assigns.user
     render(conn, "show.json", user: user)
   end
 
-  def update(conn, %{"id" => id, "user" => user_params}) do
-    user = Accounts.get_user!(id)
-
-    with {:ok, %User{} = user} <- Accounts.update_user(user, user_params) do
+  def update(conn, %{"user" => user_params}) do
+    with user = conn.assigns.user,
+         {:ok, %User{} = user} <- Accounts.update_user(user, user_params) do
       render(conn, "show.json", user: user)
     end
   end
 
-  def delete(conn, %{"id" => id}) do
-    user = Accounts.get_user!(id)
-
-    with {:ok, _} <- Accounts.delete_user(user) do
+  def delete(conn, _params) do
+    with user = conn.assigns.user,
+         {:ok, _} <- Accounts.delete_user(user) do
       send_resp(conn, :no_content, "")
     end
   end
@@ -67,5 +66,9 @@ defmodule LILDWeb.UserController do
       |> LILDWeb.FallbackController.call({:error, :unauthorized})
       |> Plug.Conn.halt()
     end
+  end
+
+  defp assign_user(conn, _) do
+    assign(conn, :user, Accounts.get_user!(conn.params["id"]))
   end
 end
